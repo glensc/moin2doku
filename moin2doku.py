@@ -137,10 +137,12 @@ def convert_markup(content, filename):
 #        ('"\]', ']]'),                              # internal link close
         # internal links
         ('\[:(.+)\]',  '[[\\1]]'),
-        # wiki:xxx
-        ('\[wiki:([^\s]+)\s+(.+)\]',  '[[\\1|\\2]]'),
         # TODO: handle more depths
-        ('\[\[(.*)/(.*)\]\]',  '[[\\1:\\2]]'),
+        ('\[\[(.*)/(.*)\]\]',  'B[[\\1:\\2]]'),
+        # wiki:xxx
+        ('\[wiki:([^\s]+)\s+(.+)]',  '[[\\1|\\2]]'),
+        ('wiki:([^\s]+)\s+(.+)',  '[[\\1|\\2]]'),
+        ('wiki:([^\s]+)',  '[[\\1]]'),
         ('(\[\[.+\]\]).*\]', '\\1'),
 
         # web link without title
@@ -175,7 +177,7 @@ def convert_markup(content, filename):
         ('\'{5}(.*)\'{5}', '**//\\1//**'),          # bold and italic
         ('\'{3}(.*)\'{3}', '**\\1**'),              # bold
         ('\'{2}(.*)\'{2}', '//\\1//'),              # italic
-		('`(.+?)`', "''\\1''"),							# monospaced
+		('`(.*?)`', "''\\1''"),							# monospaced
         ('(?<!\[)(\b[A-Z]+[a-z]+[A-Z][A-Za-z]*\b)','[[\\1]]'),  # CamelCase, dont change if CamelCase is in InternalLink
         ('\[\[Date\(([\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}Z)\)\]\]', '\\1'),  # Date value
         ('attachment:(.*)','{{'+namespace+'\\1|}}')
