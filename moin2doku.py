@@ -161,7 +161,8 @@ def print_help():
     print "Usage: moinconv.py <moinmoin pages directory> <output directory>"
     print "Convert MoinMoin pages to DokuWiki."
     print "Options:"
-    print "-f Overwrite output files"
+    print "-o      - overwrite output files"
+    print "-f FILE - convert signle file"
     sys.exit(0)
 
 def unquote(filename):
@@ -234,17 +235,20 @@ def convertfile(pathname, overwrite = False):
 # "main" starts here
 #
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hf', [ "help" ])
-except getopt.GetoptError:
-    print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
+    opts, args = getopt.getopt(sys.argv[1:], 'hof:', [ "help" ])
+except getopt.GetoptError, e:
+    print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
     sys.exit(1)
 
 overwrite = False
+inputfile = None
 for o, a in opts:
   if o == "--help" or o == "-h":
       print_help()
-  if o == "-f":
+  if o == "-o":
       overwrite = True
+  if o == "-f":
+      inputfile = a
 
 if len(args) != 2:
   print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
@@ -257,11 +261,13 @@ check_dirs(moin_pages_dir, output_dir)
 print 'Input dir is: %s.' % moin_pages_dir
 print 'Output dir is: %s.' % output_dir
 
-pathnames = get_path_names(moin_pages_dir)
-converted = 0
-for pathname in pathnames:
-    res = convertfile(pathname, overwrite = overwrite)
-    if res != None:
-      converted += 1
-
-print "Processed %d files, converted %d" % (len(pathnames), converted)
+if inputfile != None:
+  res = convertfile(inputfile, overwrite = overwrite)
+else:
+  pathnames = get_path_names(moin_pages_dir)
+  converted = 0
+  for pathname in pathnames:
+      res = convertfile(pathname, overwrite = overwrite)
+      if res != None:
+        converted += 1
+  print "Processed %d files, converted %d" % (len(pathnames), converted)
