@@ -98,11 +98,14 @@ def copy_attachments(page_dir, attachment_dir):
     return
 
   if not isdir(attachment_dir):
-    os.mkdir(attachment_dir)
+    os.makedirs(attachment_dir);
 
   attachments = listdir(dir)
   for attachment in attachments:
-    cmd_string = 'cp -p "' + dir +'/' + attachment + '" "' + attachment_dir + attachment.lower() + '"'
+    src = os.path.join(dir, attachment)
+    dst = os.path.join(attachment_dir, attachment.lower())
+    cmd_string = 'cp -p "' + src + '" "' + dst + '"'
+    print cmd_string
     os.system(cmd_string)
 
 def convert_markup(content, filename):
@@ -248,7 +251,7 @@ def convertfile(pathname, overwrite = False):
     id = ns[-1]
 
     dir = output_dir
-    attachment_dir = output_dir + 'media/'
+    attachment_dir = os.path.join(output_dir, 'media')
 
     # root namespace files go to "unsorted"
     if count == 1:
@@ -256,7 +259,7 @@ def convertfile(pathname, overwrite = False):
 
     for p in ns[:-1]:
       dir = os.path.join(dir, p);
-      attachment_dir = os.path.join(p);
+      attachment_dir = os.path.join(attachment_dir, p);
 
     content = convert_markup(content, ns)
     out_file = os.path.join(dir, id + '.txt')
