@@ -1,5 +1,6 @@
 #!/usr/bin/python
-# Setup VIM: ex: et ts=4 :
+# -*- coding: utf-8 -*-
+# Setup VIM: ex: et ts=2 sw=2 :
 #
 # moin2doku.py
 #
@@ -23,8 +24,10 @@
 # version 0.1  02.2010  Slim Gaillard, based on the "extended python"
 #                       convert.py script here:
 #                       http://www.dokuwiki.org/tips:moinmoin2doku
+# version 0.2 Elan Ruusamäe, moved to github, track history there
+#                       https://github.com/glensc/moin2doku
 #
-import sys, os, os.path, re, pdb
+import sys, os, os.path, re
 from os import listdir
 from os.path import isdir, basename
 
@@ -48,27 +51,66 @@ def get_path_names(moin_pages_dir):
 
     return pathnames
 
+def readfile(filename):
+    return file(filename, 'r').readlines()
+
+def writefile(filename, content, overwrite=False):
+  dir = os.path.split(filename)[0]
+  if not isdir(dir):
+    os.makedirs(dir);
+
+  if os.path.exists(filename) and overwrite == False:
+    raise OSError, 'File already exists: %s' % filename
+
+  f = file(filename, 'w')
+  f.writelines([it.rstrip() + '\n' for it in content if it])
+  f.close()
+
 def get_current_revision(page_dir):
-    rev_dir = os.path.join(page_dir, 'revisions')
-    if isdir(rev_dir):
-        revisions = listdir(rev_dir)
-        revisions.sort()
-        return os.path.join(rev_dir, revisions[-1])
+  rev_dir = os.path.join(page_dir, 'revisions')
+  # try "current" file first
+  f = os.path.join(page_dir, 'current')
+  if os.path.exists(f):
+    rev = readfile(f)[0].rstrip()
+    try:
+      int(rev)
+    except ValueError, e:
+      raise OSError, 'corrupted: %s: %s' % (f, rev)
+  else:
+    if not isdir(rev_dir):
+      return None
+    revisions = listdir(rev_dir)
+    revisions.sort()
+    rev = revisions[-1]
+
+  print "%s rev: %s" % (page_dir, rev)
+  f = os.path.join(rev_dir, rev)
+  if not os.path.exists(f):
+    # deleted pages have '00000002' in current, and no existing file
     return None
 
-def copy_attachments(page_dir, attachment_dir):
-  dir = os.path.join(page_dir,'attachments')
-  if isdir(dir):
-    attachments = listdir(dir)
-    #pdb.set_trace()
-    for attachment in attachments:
-      cmd_string = 'cp "' + dir +'/' + attachment + '" "' + attachment_dir + attachment.lower() + '"'
-      os.system ( cmd_string )
+  return f
 
-def convert_page(page, file):
+def copy_attachments(page_dir, attachment_dir):
+  dir = os.path.join(page_dir, 'attachments')
+  if not isdir(dir):
+    return
+
+  if not isdir(attachment_dir):
+    os.mkdir(attachment_dir)
+
+  attachments = listdir(dir)
+  for attachment in attachments:
+    cmd_string = 'cp -p "' + dir +'/' + attachment + '" "' + attachment_dir + attachment.lower() + '"'
+    os.system(cmd_string)
+
+def convert_markup(page, filename):
+    """
+    convert page markup
+    """
     namespace = ':'
-    for i in range(0, len(file) - 1):
-      namespace += file[i] + ':'
+    for i in range(0, len(filename) - 1):
+      namespace += filename[i] + ':'
 
     regexp = (
         ('\[\[TableOfContents.*\]\]', ''),          # remove
@@ -82,7 +124,7 @@ def convert_page(page, file):
         #('\[\[(.*)/(.*)\]\]',  '[[\\1:\\2]]'),
         #('(\[\[.*\]\]).*\]', '\\1'),
         ('\[(http.*) .*\]', '[[\\1]]'),             # web link
-        ('\["/(.*)"\]', '[['+file[-1]+':\\1]]'),
+        ('\["/(.*)"\]', '[['+filename[-1]+':\\1]]'),
         ('\{{3}', '<'+'code>'),                        # code open
         ('\}{3}', '<'+'/code>'),                       # code close
         ('^\s\s\s\s\*', '        *'),
@@ -123,7 +165,7 @@ def print_parameter_error():
     print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
     sys.exit(1)
 
-def fix_name( filename ):
+def unquote(filename):
     filename = filename.lower()
     filename = filename.replace('(2d)', '-')          # hyphen
     filename = filename.replace('(20)', '_')          # space->underscore
@@ -143,6 +185,51 @@ def fix_name( filename ):
     filename = filename.replace('(c3a4)', 'ae')       # umlaut
     filename = filename.replace('(c3b6)', 'oe')       # umlaut
     return filename
+
+def convertfile(pathname):
+    print "-> %s" % pathname
+    curr_rev = get_current_revision(pathname)
+    if curr_rev == None:
+        print "SKIP %s: no current revision" % pathname
+        return
+
+    if not os.path.exists(curr_rev):
+        print "SKIP %s: filename missing" % curr_rev
+        return
+
+    page_name = basename(pathname)
+    if page_name.count('MoinEditorBackup') > 0:
+        print "SKIP %s: skip backups" % pathname
+        return
+
+    content = readfile(curr_rev)
+
+    page_name = unquote(page_name)
+    print "dokuname: %s" % page_name
+
+  # split by namespace separator
+    ns = page_name.split('(2f)')
+    count = len(ns)
+    id = ns[-1]
+
+    dir = output_dir
+    attachment_dir = output_dir + 'media/'
+
+    # root namespace files go to "unsorted"
+    if count == 1:
+      ns.insert(0, 'unsorted')
+
+    for p in ns[:-1]:
+      dir = os.path.join(dir, p);
+      attachment_dir = os.path.join(p);
+
+    content = convert_markup(content, ns)
+    out_file = os.path.join(dir, id + '.txt')
+    writefile(out_file, content)
+
+    copy_attachments(pathname, attachment_dir)
+
+    return 1
 
 #
 # "main" starts here
@@ -164,71 +251,10 @@ print 'Input dir is: %s.' % moin_pages_dir
 print 'Output dir is: %s.' % output_dir
 
 pathnames = get_path_names(moin_pages_dir)
-
+converted = 0
 for pathname in pathnames:
-    print "-> %s" % pathname
-#    pdb.set_trace() # start debugging here
+    res = convertfile(pathname)
+    if res != None:
+      converted += 1
 
-    curr_rev = get_current_revision(pathname)
-    if curr_rev == None:
-        print "SKIP %s: no current revision" % pathname
-        continue
-
-    print curr_rev
-    if not os.path.exists(curr_rev):
-        continue
-
-    page_name = basename(pathname)
-    if page_name.count('MoinEditorBackup') > 0 : continue # don't convert backups
-
-    curr_rev_desc = file(curr_rev, 'r')
-    curr_rev_content = curr_rev_desc.readlines()
-    curr_rev_desc.close()
-
-    page_name = fix_name( page_name )
-
-    split = page_name.split('(2f)') # namespaces
-
-    count = len(split)
-
-    dateiname = split[-1]
-
-    dir = output_dir
-    # changed from attachment_dir = output_dir + '../media/':
-    attachment_dir = output_dir + 'media/'
-    if not isdir (attachment_dir):
-      os.mkdir(attachment_dir)
-
-    if count == 1:
-      dir += 'unsorted'
-      if not isdir (dir):
-        os.mkdir(dir)
-
-      attachment_dir += 'unsorted/'
-      if not isdir (attachment_dir):
-        os.mkdir(attachment_dir)
-
-    for i in range(0, count - 1):
-
-      dir += split[i] + '/'
-      if not isdir (dir):
-        os.mkdir(dir)
-
-      attachment_dir += split[i] + '/'
-      if not isdir (attachment_dir):
-        os.mkdir(attachment_dir)
-
-    if count == 1:
-      str = 'unsorted/' + page_name
-      split = str.split('/')
-      curr_rev_content = convert_page(curr_rev_content, split)
-    else:
-      curr_rev_content = convert_page(curr_rev_content, split)
-
-    out_file = os.path.join(dir, dateiname + '.txt')
-    out_desc = file(out_file, 'w')
-    out_desc.writelines([it.rstrip() + '\n' for it in curr_rev_content if it])
-    out_desc.close()
-
-    # pdb.set_trace() # start debugging here
-    copy_attachments(pathname, attachment_dir)
+print "Processed %d files, converted %d" % (len(pathnames), converted)
