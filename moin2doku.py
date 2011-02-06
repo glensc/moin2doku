@@ -133,7 +133,7 @@ def convert_markup(page, filename):
         # web link without title
         ('\[(http[^\s]+)\]', '[[\\1]]'),
         # web link with title
-        ('\[(http[^\s]+)\s+(.+)\]', '[[\\1|\\2]]'),
+        ('\[(http[^\s]+)\s+(.+?)\]', '[[\\1|\\2]]'),
 
         ('\["/(.*)"\]', '[['+filename[-1]+':\\1]]'),
         ('\{{3}', '<'+'code>'),                        # code open
