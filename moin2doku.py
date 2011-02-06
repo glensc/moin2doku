@@ -144,13 +144,20 @@ def convert_markup(content, filename):
         ('(\[\[.+\]\]).*\]', '\\1'),
 
         # web link without title
-        ('\[(http[^\s]+)\]', '[[\\1]]'),
+        ('\[((?:http|https|file)[^\s]+)\]', '[[\\1]]'),
         # web link with title
-        ('\[(http[^\s]+)\s+(.+?)\]', '[[\\1|\\2]]'),
+        ('\[((?:http|https|file)[^\s]+)\s+(.+?)\]', '[[\\1|\\2]]'),
 
         ('\["/(.*)"\]', '[['+filename[-1]+':\\1]]'),
-        ('\{{3}', '<'+'code>'),                        # code open
-        ('\}{3}', '<'+'/code>'),                       # code close
+
+        # code blocks
+        # open and language
+        ('\{{3}#!(python|php)', '<'+'code \\1>'),
+        # code open
+        ('\{{3}', '<'+'code>'),
+        # close
+        ('\}{3}', '<'+'/code>'),
+
         ('^\s\s\s\s\*', '        *'),
         ('^\s\s\s\*', '      *'),
         ('^\s\s\*', '    *'),
