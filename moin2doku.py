@@ -120,7 +120,7 @@ def convert_markup(content, filename):
         ('\[\[BR\]\]', '\n'),                       # newline
         ('#pragma section-numbers off', ''),        # remove
         ('^##.*?\\n', ''),                          # comments: remove
-		('^#(pragma|format|redirect|refresh|language)(.*)', ''), # remove all
+		('^#(pragma|format|redirect|refresh|language|acl)(.*?)\n', ''), # remove all
 		('^#deprecated(.*)\n', '<note warning>This page is deprecated<note>\n'),	# deprecated
 
 		# Other elements
@@ -168,6 +168,7 @@ def convert_markup(content, filename):
         ('\'{5}(.*)\'{5}', '**//\\1//**'),          # bold and italic
         ('\'{3}(.*)\'{3}', '**\\1**'),              # bold
         ('\'{2}(.*)\'{2}', '//\\1//'),              # italic
+		('`(.+?)`', "''\\1''"),							# monospaced
         ('(?<!\[)(\b[A-Z]+[a-z]+[A-Z][A-Za-z]*\b)','[[\\1]]'),  # CamelCase, dont change if CamelCase is in InternalLink
         ('\[\[Date\(([\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}Z)\)\]\]', '\\1'),  # Date value
         ('attachment:(.*)','{{'+namespace+'\\1|}}')
