@@ -119,12 +119,22 @@ def convert_markup(page, filename):
         ('\[\[BR\]\]', '\n'),                       # newline
         ('#pragma section-numbers off', ''),        # remove
         ('^##.*?\\n', ''),                          # remove
-        ('\["', '[['),                              # internal link open
-        ('"\]', ']]'),                              # internal link close
-        #('\[:(.*):',  '[[\\1]] '),                 # original internal link expressions
-        #('\[\[(.*)/(.*)\]\]',  '[[\\1:\\2]]'),
-        #('(\[\[.*\]\]).*\]', '\\1'),
-        ('\[(http.*) .*\]', '[[\\1]]'),             # web link
+
+#        ('\["', '[['),                              # internal link open
+#        ('"\]', ']]'),                              # internal link close
+        # internal links
+        ('\[:(.+)\]',  '[[\\1]]'),
+        # wiki:xxx
+        ('\[wiki:([^\s]+)\s+(.+)\]',  '[[\\1|\\2]]'),
+        # TODO: handle more depths
+        ('\[\[(.*)/(.*)\]\]',  '[[\\1:\\2]]'),
+        ('(\[\[.+\]\]).*\]', '\\1'),
+
+        # web link without title
+        ('\[(http[^\s]+)\]', '[[\\1]]'),
+        # web link with title
+        ('\[(http[^\s]+)\s+(.+)\]', '[[\\1|\\2]]'),
+
         ('\["/(.*)"\]', '[['+filename[-1]+':\\1]]'),
         ('\{{3}', '<'+'code>'),                        # code open
         ('\}{3}', '<'+'/code>'),                       # code close
