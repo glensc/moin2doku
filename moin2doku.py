@@ -28,6 +28,7 @@
 #                       https://github.com/glensc/moin2doku
 #
 import sys, os, os.path, re
+import getopt
 from os import listdir
 from os.path import isdir, basename
 
@@ -161,10 +162,6 @@ def print_help():
     print "Convert MoinMoin pages to DokuWiki."
     sys.exit(0)
 
-def print_parameter_error():
-    print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
-    sys.exit(1)
-
 def unquote(filename):
     filename = filename.lower()
     filename = filename.replace('(2d)', '-')          # hyphen
@@ -234,16 +231,22 @@ def convertfile(pathname):
 #
 # "main" starts here
 #
-if len(sys.argv) > 1:
-    if sys.argv[1] in ('-h', '--help'):
-        print_help()
-    elif len(sys.argv) > 2:
-        moin_pages_dir = sys.argv[1]
-        output_dir = sys.argv[2]
-    else:
-        print_parameter_error()
-else:
-    print_parameter_error()
+try:
+    opts, args = getopt.getopt(sys.argv[1:], 'h', [ "help" ])
+except getopt.GetoptError:
+    print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
+    sys.exit(1)
+
+for o, a in opts:
+  if o == "--help" or o == "-h":
+      print_help()
+
+if len(sys.argv) != 2:
+  print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
+  sys.exit(1)
+
+moin_pages_dir = sys.argv[1]
+output_dir = sys.argv[2]
 
 check_dirs(moin_pages_dir, output_dir)
 
