@@ -160,6 +160,8 @@ def convert_markup(page, filename):
 def print_help():
     print "Usage: moinconv.py <moinmoin pages directory> <output directory>"
     print "Convert MoinMoin pages to DokuWiki."
+    print "Options:"
+    print "-f Overwrite output files"
     sys.exit(0)
 
 def unquote(filename):
@@ -183,7 +185,7 @@ def unquote(filename):
     filename = filename.replace('(c3b6)', 'oe')       # umlaut
     return filename
 
-def convertfile(pathname):
+def convertfile(pathname, overwrite = False):
     print "-> %s" % pathname
     curr_rev = get_current_revision(pathname)
     if curr_rev == None:
@@ -222,7 +224,7 @@ def convertfile(pathname):
 
     content = convert_markup(content, ns)
     out_file = os.path.join(dir, id + '.txt')
-    writefile(out_file, content)
+    writefile(out_file, content, overwrite = overwrite)
 
     copy_attachments(pathname, attachment_dir)
 
@@ -232,21 +234,23 @@ def convertfile(pathname):
 # "main" starts here
 #
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'h', [ "help" ])
+    opts, args = getopt.getopt(sys.argv[1:], 'hf', [ "help" ])
 except getopt.GetoptError:
     print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
     sys.exit(1)
 
+overwrite = False
 for o, a in opts:
   if o == "--help" or o == "-h":
       print_help()
+  if o == "-f":
+      overwrite = True
 
-if len(sys.argv) != 2:
+if len(args) != 2:
   print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
   sys.exit(1)
 
-moin_pages_dir = sys.argv[1]
-output_dir = sys.argv[2]
+(moin_pages_dir, output_dir) = args
 
 check_dirs(moin_pages_dir, output_dir)
 
@@ -256,7 +260,7 @@ print 'Output dir is: %s.' % output_dir
 pathnames = get_path_names(moin_pages_dir)
 converted = 0
 for pathname in pathnames:
-    res = convertfile(pathname)
+    res = convertfile(pathname, overwrite = overwrite)
     if res != None:
       converted += 1
 
