@@ -29,6 +29,7 @@
 #
 import sys, os, os.path, re
 import getopt
+from shutil import copyfile, copystat
 from os import listdir
 from os.path import isdir, basename
 
@@ -104,9 +105,8 @@ def copy_attachments(page_dir, attachment_dir):
   for attachment in attachments:
     src = os.path.join(dir, attachment)
     dst = os.path.join(attachment_dir, attachment.lower())
-    cmd_string = 'cp -p "' + src + '" "' + dst + '"'
-    print cmd_string
-    os.system(cmd_string)
+    copyfile(src, dst)
+    copystat(src, dst)
 
 def convert_markup(content, filename):
   """
