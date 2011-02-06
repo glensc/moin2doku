@@ -33,27 +33,27 @@ from os import listdir
 from os.path import isdir, basename
 
 def check_dirs(moin_pages_dir, output_dir):
-    if not isdir(moin_pages_dir):
-        print >> sys.stderr, "MoinMoin pages directory doesn't exist!"
-        sys.exit(1)
+  if not isdir(moin_pages_dir):
+    print >> sys.stderr, "MoinMoin pages directory doesn't exist!"
+    sys.exit(1)
 
-    if not isdir(output_dir):
-        print >> sys.stderr, "Output directory doesn't exist!"
-        sys.exit(1)
+  if not isdir(output_dir):
+    print >> sys.stderr, "Output directory doesn't exist!"
+    sys.exit(1)
 
 def get_path_names(moin_pages_dir):
-    items = listdir(moin_pages_dir)
-    pathnames = []
+  items = listdir(moin_pages_dir)
+  pathnames = []
 
-    for item in items:
-        item = os.path.join(moin_pages_dir, item)
-        if isdir(item):
-            pathnames.append(item)
+  for item in items:
+      item = os.path.join(moin_pages_dir, item)
+      if isdir(item):
+          pathnames.append(item)
 
-    return pathnames
+  return pathnames
 
 def readfile(filename):
-    return file(filename, 'r').readlines()
+  return file(filename, 'r').readlines()
 
 def writefile(filename, content, overwrite=False):
   dir = os.path.split(filename)[0]
@@ -109,184 +109,184 @@ def copy_attachments(page_dir, attachment_dir):
     os.system(cmd_string)
 
 def convert_markup(content, filename):
-    """
-    convert page markup
-    """
-    namespace = ':'
-    for i in range(0, len(filename) - 1):
-      namespace += filename[i] + ':'
+  """
+  convert page markup
+  """
+  namespace = ':'
+  for i in range(0, len(filename) - 1):
+    namespace += filename[i] + ':'
 
-    # http://www.pld-linux.org/SyntaxReference
-    regexp = (
-        ('\[\[TableOfContents.*\]\]', ''),          # remove
-        ('\[\[BR\]\]$', ''),                        # newline at end of line - remove
-        ('\[\[BR\]\]', '\n'),                       # newline
-        ('#pragma section-numbers off', ''),        # remove
-        ('^##.*?\\n', ''),                          # comments: remove
-		('^#(pragma|format|redirect|refresh|language|acl)(.*?)\n', ''), # remove all
-		('^#deprecated(.*)\n', '<note warning>This page is deprecated<note>\n'),	# deprecated
+  # http://www.pld-linux.org/SyntaxReference
+  regexp = (
+  ('\[\[TableOfContents.*\]\]', ''),          # remove
+  ('\[\[BR\]\]$', ''),                        # newline at end of line - remove
+  ('\[\[BR\]\]', '\n'),                       # newline
+  ('#pragma section-numbers off', ''),        # remove
+  ('^##.*?\\n', ''),                          # comments: remove
+  ('^#(pragma|format|redirect|refresh|language|acl)(.*?)\n', ''), # remove all
+  ('^#deprecated(.*)\n', '<note warning>This page is deprecated<note>\n'),	# deprecated
 
-		# Other elements
-        # break
-		('(<<BR>>)|(\[\[BR]])', '\\\\ '),
+  # Other elements
+      # break
+  ('(<<BR>>)|(\[\[BR]])', '\\\\ '),
 
-        # horizontal line
-		('^\s*-{4,}\s*$', '----\n'),
-		# Macros and another foolish - simply remove
-        # macros
-		('<<.+?>>', ''),
-        ('\[\[Anchor\(\w+\)\]\]', ''),
-        ('\[\[(PageCount|RandomPage)\]\]', ''),
+      # horizontal line
+  ('^\s*-{4,}\s*$', '----\n'),
+  # Macros and another foolish - simply remove
+      # macros
+  ('<<.+?>>', ''),
+  ('\[\[Anchor\(\w+\)\]\]', ''),
+  ('\[\[(PageCount|RandomPage)\]\]', ''),
 
-#        ('\["', '[['),                              # internal link open
-#        ('"\]', ']]'),                              # internal link close
-        # internal links
-        ('\[:(.+)\]',  '[[\\1]]'),
-        # TODO: handle more depths
-        ('\[\[(.*)/(.*)\]\]',  'B[[\\1:\\2]]'),
-        # wiki:xxx
-        ('\[wiki:([^\s]+)\s+(.+)]',  '[[\\1|\\2]]'),
-        ('wiki:([^\s]+)\s+(.+)',  '[[\\1|\\2]]'),
-        ('wiki:([^\s]+)',  '[[\\1]]'),
-        ('(\[\[.+\]\]).*\]', '\\1'),
+#    ('\["', '[['),                              # internal link open
+#    ('"\]', ']]'),                              # internal link close
+  # internal links
+  ('\[:(.+)\]',  '[[\\1]]'),
+  # TODO: handle more depths
+  ('\[\[(.*)/(.*)\]\]',  'B[[\\1:\\2]]'),
+  # wiki:xxx
+  ('\[wiki:([^\s]+)\s+(.+)]',  '[[\\1|\\2]]'),
+  ('wiki:([^\s]+)\s+(.+)',  '[[\\1|\\2]]'),
+  ('wiki:([^\s]+)',  '[[\\1]]'),
+  ('(\[\[.+\]\]).*\]', '\\1'),
 
-        # web link without title
-        ('\[((?:http|https|file)[^\s]+)\]', '[[\\1]]'),
-        # web link with title
-        ('\[((?:http|https|file)[^\s]+)\s+(.+?)\]', '[[\\1|\\2]]'),
+  # web link without title
+  ('\[((?:http|https|file)[^\s]+)\]', '[[\\1]]'),
+  # web link with title
+  ('\[((?:http|https|file)[^\s]+)\s+(.+?)\]', '[[\\1|\\2]]'),
 
-        ('\["/(.*)"\]', '[['+filename[-1]+':\\1]]'),
+  ('\["/(.*)"\]', '[['+filename[-1]+':\\1]]'),
 
-        # code blocks
-        # open and language
-        ('\{{3}#!(python|php)', '<'+'code \\1>'),
-        # code open
-        ('\{{3}', '<'+'code>'),
-        # close
-        ('\}{3}', '<'+'/code>'),
+  # code blocks
+  # open and language
+  ('\{{3}#!(python|php)', '<'+'code \\1>'),
+  # code open
+  ('\{{3}', '<'+'code>'),
+  # close
+  ('\}{3}', '<'+'/code>'),
 
-        ('^\s\s\s\s\*', '        *'),
-        ('^\s\s\s\*', '      *'),
-        ('^\s\s\*', '    *'),
-        ('^\s\*', '  *'),                           # lists must have 2 whitespaces before the asterisk
-        ('^\s\s\s\s1\.', '      -'),
-        ('^\s\s1\.', '    -'),
-        ('^\s1\.', '  -'),
-        ('^\s*=====\s*(.*)\s*=====\s*$', '=-=- \\1 =-=-'),           # heading 5
-        ('^\s*====\s*(.*)\s*====\s*$', '=-=-=- \\1 =-=-=-'),         # heading 4
-        ('^\s*===\s*(.*)\s*===\s*$', '=-=-=-=- \\1 =-=-=-=-'),       # heading 3
-        ('^\s*==\s*(.*)\s*==\s*$', '=-=-=-=-=- \\1 =-=-=-=-=-'),     # heading 2
-        ('^\s*=\s*(.*)\s=\s*$', '=-=-=-=-=-=- \\1 =-=-=-=-=-=-'),    # heading 1
-        ('=-', '='),
-        ('\|{2}', '|'),                             # table separator
-        ('\'{5}(.*)\'{5}', '**//\\1//**'),          # bold and italic
-        ('\'{3}(.*)\'{3}', '**\\1**'),              # bold
-        ('\'{2}(.*)\'{2}', '//\\1//'),              # italic
-		('`(.*?)`', "''\\1''"),							# monospaced
-        ('(?<!\[)(\b[A-Z]+[a-z]+[A-Z][A-Za-z]*\b)','[[\\1]]'),  # CamelCase, dont change if CamelCase is in InternalLink
-        ('\[\[Date\(([\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}Z)\)\]\]', '\\1'),  # Date value
-        ('attachment:(.*)','{{'+namespace+'\\1|}}')
-    )
+  ('^\s\s\s\s\*', '        *'),
+  ('^\s\s\s\*', '      *'),
+  ('^\s\s\*', '    *'),
+  ('^\s\*', '  *'),                           # lists must have 2 whitespaces before the asterisk
+  ('^\s\s\s\s1\.', '      -'),
+  ('^\s\s1\.', '    -'),
+  ('^\s1\.', '  -'),
+  ('^\s*=====\s*(.*)\s*=====\s*$', '=-=- \\1 =-=-'),           # heading 5
+  ('^\s*====\s*(.*)\s*====\s*$', '=-=-=- \\1 =-=-=-'),         # heading 4
+  ('^\s*===\s*(.*)\s*===\s*$', '=-=-=-=- \\1 =-=-=-=-'),       # heading 3
+  ('^\s*==\s*(.*)\s*==\s*$', '=-=-=-=-=- \\1 =-=-=-=-=-'),     # heading 2
+  ('^\s*=\s*(.*)\s=\s*$', '=-=-=-=-=-=- \\1 =-=-=-=-=-=-'),    # heading 1
+  ('=-', '='),
+  ('\|{2}', '|'),                             # table separator
+  ('\'{5}(.*)\'{5}', '**//\\1//**'),          # bold and italic
+  ('\'{3}(.*)\'{3}', '**\\1**'),              # bold
+  ('\'{2}(.*)\'{2}', '//\\1//'),              # italic
+  ('`(.*?)`', "''\\1''"),							# monospaced
+  ('(?<!\[)(\b[A-Z]+[a-z]+[A-Z][A-Za-z]*\b)','[[\\1]]'),  # CamelCase, dont change if CamelCase is in InternalLink
+  ('\[\[Date\(([\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}Z)\)\]\]', '\\1'),  # Date value
+  ('attachment:(.*)','{{'+namespace+'\\1|}}')
+  )
 
-    for i in range(len(content)):
-        line = content[i]
-        for item in regexp:
-            line = re.sub(item[0], item[1], line)
-        content[i] = line
-    return content
+  for i in range(len(content)):
+    line = content[i]
+    for item in regexp:
+      line = re.sub(item[0], item[1], line)
+    content[i] = line
+  return content
 
 def print_help():
-    print "Usage: moinconv.py <moinmoin pages directory> <output directory>"
-    print "Convert MoinMoin pages to DokuWiki."
-    print "Options:"
-    print "-o      - overwrite output files"
-    print "-f FILE - convert signle file"
-    sys.exit(0)
+  print "Usage: moinconv.py <moinmoin pages directory> <output directory>"
+  print "Convert MoinMoin pages to DokuWiki."
+  print "Options:"
+  print "-o      - overwrite output files"
+  print "-f FILE - convert signle file"
+  sys.exit(0)
 
 def unquote(filename):
-    filename = filename.lower()
-    filename = filename.replace('(2d)', '-')          # hyphen
-    filename = filename.replace('(20)', '_')          # space->underscore
-    filename = filename.replace('(2e)', '_')          # decimal point->underscore
-    filename = filename.replace('(29)', '_')          # )->underscore
-    filename = filename.replace('(28)', '_')          # (->underscore
-    filename = filename.replace('.', '_')             # decimal point->underscore
-    filename = filename.replace('(2c20)', '_')        # comma + space->underscore
-    filename = filename.replace('(2028)', '_')        # space + (->underscore
-    filename = filename.replace('(2920)', '_')        # ) + space->underscore
-    filename = filename.replace('(2220)', 'inch_')    # " + space->inch + underscore
-    filename = filename.replace('(3a20)', '_')        # : + space->underscore
-    filename = filename.replace('(202827)', '_')      # space+(+'->underscore
-    filename = filename.replace('(2720)', '_')        # '+ space->underscore
-    filename = filename.replace('(c3bc)', 'ue')       # umlaut
-    filename = filename.replace('(c384)', 'Ae')       # umlaut
-    filename = filename.replace('(c3a4)', 'ae')       # umlaut
-    filename = filename.replace('(c3b6)', 'oe')       # umlaut
-    return filename
+  filename = filename.lower()
+  filename = filename.replace('(2d)', '-')          # hyphen
+  filename = filename.replace('(20)', '_')          # space->underscore
+  filename = filename.replace('(2e)', '_')          # decimal point->underscore
+  filename = filename.replace('(29)', '_')          # )->underscore
+  filename = filename.replace('(28)', '_')          # (->underscore
+  filename = filename.replace('.', '_')             # decimal point->underscore
+  filename = filename.replace('(2c20)', '_')        # comma + space->underscore
+  filename = filename.replace('(2028)', '_')        # space + (->underscore
+  filename = filename.replace('(2920)', '_')        # ) + space->underscore
+  filename = filename.replace('(2220)', 'inch_')    # " + space->inch + underscore
+  filename = filename.replace('(3a20)', '_')        # : + space->underscore
+  filename = filename.replace('(202827)', '_')      # space+(+'->underscore
+  filename = filename.replace('(2720)', '_')        # '+ space->underscore
+  filename = filename.replace('(c3bc)', 'ue')       # umlaut
+  filename = filename.replace('(c384)', 'Ae')       # umlaut
+  filename = filename.replace('(c3a4)', 'ae')       # umlaut
+  filename = filename.replace('(c3b6)', 'oe')       # umlaut
+  return filename
 
 def convertfile(pathname, overwrite = False):
-    print "-> %s" % pathname
-    curr_rev = get_current_revision(pathname)
-    if curr_rev == None:
-        print "SKIP %s: no current revision" % pathname
-        return
+  print "-> %s" % pathname
+  curr_rev = get_current_revision(pathname)
+  if curr_rev == None:
+    print "SKIP %s: no current revision" % pathname
+    return
 
-    if not os.path.exists(curr_rev):
-        print "SKIP %s: filename missing" % curr_rev
-        return
+  if not os.path.exists(curr_rev):
+    print "SKIP %s: filename missing" % curr_rev
+    return
 
-    page_name = basename(pathname)
-    if page_name.count('MoinEditorBackup') > 0:
-        print "SKIP %s: skip backups" % pathname
-        return
+  page_name = basename(pathname)
+  if page_name.count('MoinEditorBackup') > 0:
+    print "SKIP %s: skip backups" % pathname
+    return
 
-    content = readfile(curr_rev)
+  content = readfile(curr_rev)
 
-    page_name = unquote(page_name)
-    print "dokuname: %s" % page_name
+  page_name = unquote(page_name)
+  print "dokuname: %s" % page_name
 
-  # split by namespace separator
-    ns = page_name.split('(2f)')
-    count = len(ns)
-    id = ns[-1]
+# split by namespace separator
+  ns = page_name.split('(2f)')
+  count = len(ns)
+  id = ns[-1]
 
-    dir = output_dir
-    attachment_dir = os.path.join(output_dir, 'media')
+  dir = output_dir
+  attachment_dir = os.path.join(output_dir, 'media')
 
-    # root namespace files go to "unsorted"
-    if count == 1:
-      ns.insert(0, 'unsorted')
+  # root namespace files go to "unsorted"
+  if count == 1:
+    ns.insert(0, 'unsorted')
 
-    for p in ns[:-1]:
-      dir = os.path.join(dir, p);
-      attachment_dir = os.path.join(attachment_dir, p);
+  for p in ns[:-1]:
+    dir = os.path.join(dir, p);
+    attachment_dir = os.path.join(attachment_dir, p);
 
-    content = convert_markup(content, ns)
-    out_file = os.path.join(dir, id + '.txt')
-    writefile(out_file, content, overwrite = overwrite)
+  content = convert_markup(content, ns)
+  out_file = os.path.join(dir, id + '.txt')
+  writefile(out_file, content, overwrite = overwrite)
 
-    copy_attachments(pathname, attachment_dir)
+  copy_attachments(pathname, attachment_dir)
 
-    return 1
+  return 1
 
 #
 # "main" starts here
 #
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hof:', [ "help" ])
+  opts, args = getopt.getopt(sys.argv[1:], 'hof:', [ "help" ])
 except getopt.GetoptError, e:
-    print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
-    sys.exit(1)
+  print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
+  sys.exit(1)
 
 overwrite = False
 inputfile = None
 for o, a in opts:
   if o == "--help" or o == "-h":
-      print_help()
+    print_help()
   if o == "-o":
-      overwrite = True
+    overwrite = True
   if o == "-f":
-      inputfile = a
+    inputfile = a
 
 if len(args) != 2:
   print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
@@ -305,7 +305,7 @@ else:
   pathnames = get_path_names(moin_pages_dir)
   converted = 0
   for pathname in pathnames:
-      res = convertfile(pathname, overwrite = overwrite)
-      if res != None:
-        converted += 1
+    res = convertfile(pathname, overwrite = overwrite)
+    if res != None:
+      converted += 1
   print "Processed %d files, converted %d" % (len(pathnames), converted)
