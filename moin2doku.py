@@ -132,6 +132,8 @@ def convert_markup(content, filename):
 		# Macros and another foolish - simply remove
         # macros
 		('<<.+?>>', ''),
+        ('\[\[Anchor\(\w+\)\]\]', ''),
+        ('\[\[(PageCount|RandomPage)\]\]', ''),
 
 #        ('\["', '[['),                              # internal link open
 #        ('"\]', ']]'),                              # internal link close
