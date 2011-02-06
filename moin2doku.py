@@ -105,7 +105,7 @@ def copy_attachments(page_dir, attachment_dir):
     cmd_string = 'cp -p "' + dir +'/' + attachment + '" "' + attachment_dir + attachment.lower() + '"'
     os.system(cmd_string)
 
-def convert_markup(page, filename):
+def convert_markup(content, filename):
     """
     convert page markup
     """
@@ -113,12 +113,25 @@ def convert_markup(page, filename):
     for i in range(0, len(filename) - 1):
       namespace += filename[i] + ':'
 
+    # http://www.pld-linux.org/SyntaxReference
     regexp = (
         ('\[\[TableOfContents.*\]\]', ''),          # remove
         ('\[\[BR\]\]$', ''),                        # newline at end of line - remove
         ('\[\[BR\]\]', '\n'),                       # newline
         ('#pragma section-numbers off', ''),        # remove
-        ('^##.*?\\n', ''),                          # remove
+        ('^##.*?\\n', ''),                          # comments: remove
+		('^#(pragma|format|redirect|refresh|language)(.*)', ''), # remove all
+		('^#deprecated(.*)\n', '<note warning>This page is deprecated<note>\n'),	# deprecated
+
+		# Other elements
+        # break
+		('(<<BR>>)|(\[\[BR]])', '\\\\ '),
+
+        # horizontal line
+		('^\s*-{4,}\s*$', '----\n'),
+		# Macros and another foolish - simply remove
+        # macros
+		('<<.+?>>', ''),
 
 #        ('\["', '[['),                              # internal link open
 #        ('"\]', ']]'),                              # internal link close
@@ -160,12 +173,12 @@ def convert_markup(page, filename):
         ('attachment:(.*)','{{'+namespace+'\\1|}}')
     )
 
-    for i in range(len(page)):
-        line = page[i]
+    for i in range(len(content)):
+        line = content[i]
         for item in regexp:
             line = re.sub(item[0], item[1], line)
-        page[i] = line
-    return page
+        content[i] = line
+    return content
 
 def print_help():
     print "Usage: moinconv.py <moinmoin pages directory> <output directory>"
