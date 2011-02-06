@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# Setup VIM: ex: et ts=4 :
 #
 # moin2doku.py
 #
@@ -53,7 +54,7 @@ def get_current_revision(page_dir):
         revisions = listdir(rev_dir)
         revisions.sort()
         return os.path.join(rev_dir, revisions[-1])
-    return ''
+    return None
 
 def copy_attachments(page_dir, attachment_dir):
   dir = os.path.join(page_dir,'attachments')
@@ -165,10 +166,17 @@ print 'Output dir is: %s.' % output_dir
 pathnames = get_path_names(moin_pages_dir)
 
 for pathname in pathnames:
-    #pdb.set_trace() # start debugging here
+    print "-> %s" % pathname
+#    pdb.set_trace() # start debugging here
 
-    curr_rev = get_current_revision( pathname )
-    if not os.path.exists( curr_rev ) : continue
+    curr_rev = get_current_revision(pathname)
+    if curr_rev == None:
+        print "SKIP %s: no current revision" % pathname
+        continue
+
+    print curr_rev
+    if not os.path.exists(curr_rev):
+        continue
 
     page_name = basename(pathname)
     if page_name.count('MoinEditorBackup') > 0 : continue # don't convert backups
