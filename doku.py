@@ -14,15 +14,18 @@ class DokuWiki:
 	def __init__(self):
 		self.callcache = {}
 
-	def __getattr__(self, callback):
-		self.callback = callback
-		return self.__dokucall
+	def __getattr__(self, method):
+		def wrap(method):
+			def wrapped(*args):
+				return self.__call(method, *args)
+			return wrapped
+		return wrap(method)
 
-	def __dokucall(self, *args):
+	def __call(self, method, *args):
 		args = list(args)
-		key = "%s:%s" % (self.callback, ",".join(args))
+		key = "%s:%s" % (method, ",".join(args))
 		if not self.callcache.has_key(key):
-			cmd = ['./doku.php', self.callback ] + args
+			cmd = ['./doku.php', method ] + args
 			res = subprocess.Popen(cmd, stdin = None, stdout = subprocess.PIPE, stderr = sys.stderr, close_fds = True).communicate()
 			print "%s->%s" % (cmd, res)
 			self.callcache[key] = res[0]
