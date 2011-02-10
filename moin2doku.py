@@ -2,32 +2,11 @@
 # -*- coding: utf-8 -*-
 # Setup VIM: ex: et ts=2 sw=2 :
 #
-# moin2doku.py
+# Main Script doing the conversion.
+# See README for details.
 #
-# A script for converting MoinMoin version 1.3+ wiki data to DokuWiki format.
-# Call with the name of the directory containing the MoinMoin pages and that
-# of the directory to receive the DokuWiki pages on the command line:
-#
-# You need to run this on host where MoinMoin is configured and DokuWiki is
-# configured, it will use current configuration from both wikis.
-#
-# python moin2doku.py ./moin/data/pages/
-#
-# set ownership: chown -R www-data:www-data /var/lib/dokuwiki/pages/*
-# chown -R www-data:www-data /var/lib/dokuwiki/media/*
-#
-# This script doesn't do all the work, and some of the work it does is
-# wrong. For instance attachment links end up with the trailing "|}}"
-# on the line following the link. This works, but doesn't look good.
-# The script interprets a "/" in a pagename as a namespace delimiter and
-# creates and fills namespace subdirectories accordingly.
-#
-# version 0.1  02.2010  Slim Gaillard, based on the "extended python"
-#                       convert.py script here:
-#                       http://www.dokuwiki.org/tips:moinmoin2doku
-# version 0.2 Elan Ruusamäe, moved to github, track history there
-#                       https://github.com/glensc/moin2doku
-#
+# Author: Elan Ruusamäe <glen@pld-linux.org>
+
 import sys, os, os.path, re
 import getopt
 from shutil import copyfile, copystat

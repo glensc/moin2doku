@@ -1,8 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Setup VIM: ex: noet ts=2 sw=2 :
-# Bridge for Python code to invoke DokuWiki functions.
-# 
+#
+# Python side Bridge of accessing DokuWiki functions from Python.
+# See README for details.
+#
 # Author: Elan Ruusamäe <glen@pld-linux.org>
 
 import sys

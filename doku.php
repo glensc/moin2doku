@@ -2,8 +2,10 @@
 <?php
 # -*- coding: utf-8 -*-
 # Setup VIM: ex: et ts=2 sw=2 :
-# Bridge for Python code to invoke DokuWiki functions.
-# 
+#
+# PHP side Bridge of accessing DokuWiki functions from Python.
+# See README for details.
+#
 # Author: Elan Ruusamäe <glen@pld-linux.org>
 #
 # You should probably adjust path to DOKU_INC.
