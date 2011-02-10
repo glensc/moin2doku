@@ -14,22 +14,16 @@ class DokuWiki:
 	def __init__(self):
 		self.callcache = {}
 
-	def __call(self, call, id):
-		key = "%s-%s" % (call, id)
+	def __getattr__(self, callback):
+		self.callback = callback
+		return self.__dokucall
+
+	def __dokucall(self, *args):
+		args = list(args)
+		key = "%s:%s" % (self.callback, ",".join(args))
 		if not self.callcache.has_key(key):
-			cmd = ['./doku.php', call, id]
+			cmd = ['./doku.php', self.callback ] + args
 			res = subprocess.Popen(cmd, stdin = None, stdout = subprocess.PIPE, stderr = sys.stderr, close_fds = True).communicate()
+			print "%s->%s" % (cmd, res)
 			self.callcache[key] = res[0]
 		return self.callcache[key]
-
-	def wikiFn(self, id):
-		return self.__call('wikiFn', id)
-
-	def mediaFn(self, id):
-		return self.__call('mediaFn', id)
-
-	def getNS(self, id):
-		return self.__call('getNS', id)
-
-	def cleanID(self, id):
-		return self.__call('cleanID', id)
