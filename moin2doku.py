@@ -8,12 +8,13 @@
 # Call with the name of the directory containing the MoinMoin pages and that
 # of the directory to receive the DokuWiki pages on the command line:
 #
-# python moin2doku.py ./moin/data/pages/ ./doku/
+# You need to run this on host where MoinMoin is configured and DokuWiki is
+# configured, it will use current configuration from both wikis.
 #
-# then move the doku pages to e.g. /var/www/MyWikiName/data/pages/,
-# move the media files to e.g. /var/www/MyWikiName/data/media/,
-# set ownership: chown -R www-data:www-data /var/www/MyWikiName/data/pages/*
-# chown -R www-data:www-data /var/www/MyWikiName/data/media/*
+# python moin2doku.py ./moin/data/pages/
+#
+# set ownership: chown -R www-data:www-data /var/lib/dokuwiki/pages/*
+# chown -R www-data:www-data /var/lib/dokuwiki/media/*
 #
 # This script doesn't do all the work, and some of the work it does is
 # wrong. For instance attachment links end up with the trailing "|}}"
@@ -32,6 +33,7 @@ import getopt
 from shutil import copyfile, copystat
 from os import listdir
 from os.path import isdir, basename
+from doku import DokuWiki
 
 def check_dirs(moin_pages_dir, output_dir):
   if not isdir(moin_pages_dir):
@@ -68,10 +70,10 @@ def writefile(filename, content, overwrite=False):
   f.writelines([it.rstrip() + '\n' for it in content if it])
   f.close()
 
-def get_current_revision(page_dir):
-  rev_dir = os.path.join(page_dir, 'revisions')
+def get_current_revision(pagedir):
+  rev_dir = os.path.join(pagedir, 'revisions')
   # try "current" file first
-  f = os.path.join(page_dir, 'current')
+  f = os.path.join(pagedir, 'current')
   if os.path.exists(f):
     rev = readfile(f)[0].rstrip()
     try:
@@ -85,7 +87,7 @@ def get_current_revision(page_dir):
     revisions.sort()
     rev = revisions[-1]
 
-  print "%s rev: %s" % (page_dir, rev)
+  print "%s rev: %s" % (pagedir, rev)
   f = os.path.join(rev_dir, rev)
   if not os.path.exists(f):
     # deleted pages have '00000002' in current, and no existing file
@@ -93,28 +95,34 @@ def get_current_revision(page_dir):
 
   return f
 
-def copy_attachments(page_dir, attachment_dir):
-  dir = os.path.join(page_dir, 'attachments')
+# pagedir = MoinMoin page dir
+# ns = DokuWiki namespace where attachments to copy
+def copy_attachments(pagedir, ns):
+  dir = os.path.join(pagedir, 'attachments')
   if not isdir(dir):
     return
 
+  attachment_dir = dw.mediaFn(ns)
   if not isdir(attachment_dir):
     os.makedirs(attachment_dir);
 
   attachments = listdir(dir)
   for attachment in attachments:
     src = os.path.join(dir, attachment)
-    dst = os.path.join(attachment_dir, attachment.lower())
+    dst = dw.mediaFn(dw.cleanID("%s/%s" % (ns, attachment)))
     copyfile(src, dst)
     copystat(src, dst)
 
-def convert_markup(content, filename):
+# convert page markup
+# pagename: name of current page (MoinMoin name)
+# content: page content (MoinMoin markup)
+def convert_markup(pagename, content):
   """
   convert page markup
   """
   namespace = ':'
-  for i in range(0, len(filename) - 1):
-    namespace += filename[i] + ':'
+#  for i in range(0, len(filename) - 1):
+#    namespace += filename[i] + ':'
 
   # http://www.pld-linux.org/SyntaxReference
   regexp = (
@@ -155,7 +163,7 @@ def convert_markup(content, filename):
   # web link with title
   ('\[((?:http|https|file)[^\s]+)\s+(.+?)\]', '[[\\1|\\2]]'),
 
-  ('\["/(.*)"\]', '[['+filename[-1]+':\\1]]'),
+#  ('\["/(.*)"\]', '[['+filename[-1]+':\\1]]'),
 
   # code blocks
   # open and language
@@ -203,69 +211,39 @@ def print_help():
   print "-f FILE - convert signle file"
   sys.exit(0)
 
-def unquote(filename):
-  filename = filename.lower()
-  filename = filename.replace('(2d)', '-')          # hyphen
-  filename = filename.replace('(20)', '_')          # space->underscore
-  filename = filename.replace('(2e)', '_')          # decimal point->underscore
-  filename = filename.replace('(29)', '_')          # )->underscore
-  filename = filename.replace('(28)', '_')          # (->underscore
-  filename = filename.replace('.', '_')             # decimal point->underscore
-  filename = filename.replace('(2c20)', '_')        # comma + space->underscore
-  filename = filename.replace('(2028)', '_')        # space + (->underscore
-  filename = filename.replace('(2920)', '_')        # ) + space->underscore
-  filename = filename.replace('(2220)', 'inch_')    # " + space->inch + underscore
-  filename = filename.replace('(3a20)', '_')        # : + space->underscore
-  filename = filename.replace('(202827)', '_')      # space+(+'->underscore
-  filename = filename.replace('(2720)', '_')        # '+ space->underscore
-  filename = filename.replace('(c3bc)', 'ue')       # umlaut
-  filename = filename.replace('(c384)', 'Ae')       # umlaut
-  filename = filename.replace('(c3a4)', 'ae')       # umlaut
-  filename = filename.replace('(c3b6)', 'oe')       # umlaut
-  return filename
+# return unicode encoded wikiname
+# input is a dir from moinmoin pages/ dir
+def wikiname(filename):
+  from MoinMoin import wikiutil
+  return wikiutil.unquoteWikiname(basename(filename))
 
-def convertfile(pathname, overwrite = False):
-  print "-> %s" % pathname
-  curr_rev = get_current_revision(pathname)
+def convertfile(pagedir, overwrite = False):
+  pagedir  = os.path.abspath(pagedir)
+  print "-> %s" % pagedir
+  curr_rev = get_current_revision(pagedir)
   if curr_rev == None:
-    print "SKIP %s: no current revision" % pathname
+    print "SKIP %s: no current revision" % pagedir
     return
 
   if not os.path.exists(curr_rev):
     print "SKIP %s: filename missing" % curr_rev
     return
 
-  page_name = basename(pathname)
-  if page_name.count('MoinEditorBackup') > 0:
-    print "SKIP %s: skip backups" % pathname
+  pagename = wikiname(pagedir)
+  print "pagename: [%s]" % pagename
+
+  if pagename.count('MoinEditorBackup') > 0:
+    print "SKIP %s: skip backups" % pagedir
     return
 
   content = readfile(curr_rev)
-
-  page_name = unquote(page_name)
-  print "dokuname: %s" % page_name
-
-# split by namespace separator
-  ns = page_name.split('(2f)')
-  count = len(ns)
-  id = ns[-1]
-
-  dir = output_dir
-  attachment_dir = os.path.join(output_dir, 'media')
-
-  # root namespace files go to "unsorted"
-  if count == 1:
-    ns.insert(0, 'unsorted')
-
-  for p in ns[:-1]:
-    dir = os.path.join(dir, p);
-    attachment_dir = os.path.join(attachment_dir, p);
-
-  content = convert_markup(content, ns)
-  out_file = os.path.join(dir, id + '.txt')
+  content = convert_markup(pagename, content)
+  out_file = dw.wikiFn(pagename)
+  print "dokuname: [%s]" % out_file
   writefile(out_file, content, overwrite = overwrite)
 
-  copy_attachments(pathname, attachment_dir)
+  ns = dw.getNS(dw.cleanID(pagename))
+  copy_attachments(pagedir, ns)
 
   return 1
 
@@ -298,6 +276,8 @@ check_dirs(moin_pages_dir, output_dir)
 
 print 'Input dir is: %s.' % moin_pages_dir
 print 'Output dir is: %s.' % output_dir
+
+dw = DokuWiki()
 
 if inputfile != None:
   res = convertfile(inputfile, overwrite = overwrite)
