@@ -16,7 +16,6 @@ class DokuWiki:
 		key = "%s-%s" % (call, id)
 		if not self.callcache.has_key(key):
 			cmd = ['./doku.php', call, id]
-			print cmd
 			res = subprocess.Popen(cmd, stdin = None, stdout = subprocess.PIPE, stderr = sys.stderr, close_fds = True).communicate()
 			self.callcache[key] = res[0]
 		return self.callcache[key]
@@ -29,3 +28,6 @@ class DokuWiki:
 
 	def getNS(self, id):
 		return self.__call('getNS', id)
+
+	def cleanID(self, id):
+		return self.__call('cleanID', id)
