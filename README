@@ -6,7 +6,7 @@ moin2doku.py
 
 A script for converting MoinMoin version 1.3+ wiki data to DokuWiki format.
 Call with the name of the directory containing the MoinMoin pages and that
-of the directory to receive the DokuWiki pages on the command line:
+of the directory to receive the DokuWiki pages on the command line.
 
 You need to run this on host where MoinMoin is configured and DokuWiki is
 configured, it will use current configuration from both wikis.
@@ -15,8 +15,8 @@ Edit doku.php if your DokuWiki installation is other than /usr/share/dokuwiki
 
 $ ./moin2doku.py ./moin/data/pages/
 
-after conversion be sure to fix ownership (www-data:www-data being your uid/gid
-webserver runs):
+after conversion be sure to fix ownership
+(www-data:www-data being your uid/gid webserver runs):
 # chown -R www-data:www-data /var/lib/dokuwiki/pages/*
 # chown -R www-data:www-data /var/lib/dokuwiki/media/*
 
