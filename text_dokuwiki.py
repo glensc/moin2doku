@@ -85,8 +85,8 @@ class Formatter(FormatterBase):
         return text
 
     def rule(self, size=0, **kw):
-		# size not supported
-		return '----\n'
+        # size not supported
+        return '----\n'
 
     def icon(self, type):
         return '<icon type="%s" />' % type
@@ -116,7 +116,8 @@ class Formatter(FormatterBase):
         return ['<li>', '</li>\n'][not on]
 
     def code(self, on, **kw):
-        return ['<code>', '</code>'][not on]
+        """ `typewriter` or {{{typerwriter}}, for code blocks i hope codeblock works """
+        return ["''", "''"][not on]
 
     def sup(self, on, **kw):
         return ['<sup>', '</sup>'][not on]
@@ -170,7 +171,7 @@ class Formatter(FormatterBase):
         return ('<link anchor="%s"%s>' % (name, extra) ,'</link>') [not on]
 
     def underline(self, on, **kw):
-        return self.strong(on) # no underline in StyleBook
+        return ['__', '__'][not on]
 
     def definition_list(self, on, **kw):
         result = ''

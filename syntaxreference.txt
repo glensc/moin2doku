@@ -4,3 +4,11 @@
 === Header 3 ===
 ==== Header 4 ====
 ===== Header 5 =====
+
+= Font styles =
+{{{
+Normal text, ''emphasized'', '''strong''', __underline__, ,,subscript,,, ^superscript^, `typewriter` and {{{typewriter}}}.
+}}}
+
+Normal text, ''emphasized'', '''strong''', __underline__, ,,subscript,,, ^superscript^, `typewriter` and {{{typewriter}}}.
+
