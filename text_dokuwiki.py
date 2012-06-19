@@ -26,7 +26,8 @@ class Formatter(FormatterBase):
         self.in_pre = 0
         self._text = None # XXX does not work with links in headings!!!!!
 
-        self.bullet_depth = 0
+        self.list_depth = 0
+        self.list_type = None
 
     def _escape(self, text, extra_mapping={"'": "&apos;", '"': "&quot;"}):
         return saxutils.escape(text, extra_mapping)
@@ -103,22 +104,26 @@ class Formatter(FormatterBase):
         return ['**', '**'][not on]
 
     def number_list(self, on, type=None, start=None, **kw):
-        result = ''
-        if self.in_p:
-            result = self.paragraph(0)
-        return result + ['<ol>', '</ol>\n'][not on]
+        # list type not supported
+        if on:
+            self.list_depth += 1
+            self.list_type = '-'
+        else:
+            self.list_depth -= 1
+
+        return ['', '\n'][on]
 
     def bullet_list(self, on, **kw):
-        # fill: '  * '
         if on:
-            self.bullet_depth += 1
+            self.list_depth += 1
+            self.list_type = '*'
         else:
-            self.bullet_depth -= 1
+            self.list_depth -= 1
 
-        return ['\n', ''][not on]
+        return ['', '\n'][on]
 
     def listitem(self, on, **kw):
-        return [(' ' * self.bullet_depth * 2) + '* ', '\n'][not on]
+        return [(' ' * self.list_depth * 2) + self.list_type + ' ', '\n'][not on]
 
     def code(self, on, **kw):
         """ `typewriter` or {{{typerwriter}}, for code blocks i hope codeblock works """

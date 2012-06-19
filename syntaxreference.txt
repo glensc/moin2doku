@@ -46,3 +46,20 @@ sixth line!
  * item 2, with gap
  * item 3
    * item 3.1
+= Numbered list =
+{{{
+ 1. item 1
+   i. item 1
+   i. item 2
+}}}
+ 1. item 1
+   i. item 1
+   i. item 2
+{{{
+ 1. item 2
+   a. item 1
+   a. item 2
+}}}
+ 1. item 2
+   a. item 1
+   a. item 2
