@@ -74,6 +74,15 @@ foo = new something(1, "soo\nice")
  * [file://servername/full/path/to/file/filename%20with%20spaces.txt Click here to read filename with spaces.txt]
  * me@privacy.net
 
+== Escaping WikiNames ==
+{{{
+Wiki''''''Name
+Wiki``Name
+}}}
+Wiki''''''Name
+Wiki``Name
+
+
 = Bullet list =
 {{{
  * item 1

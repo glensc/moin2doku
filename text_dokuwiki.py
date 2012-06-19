@@ -198,11 +198,23 @@ class Formatter(FormatterBase):
 
     def image(self, src=None, **kw):
         valid_attrs = ['src', 'width', 'height', 'alt', 'title']
-        attrs = {'src': src}
+
+        url = src
+        if '?' in url:
+            url += '&'
+        else:
+            url += '?'
+
+        attrs = {}
         for key, value in kw.items():
             if key in valid_attrs:
                 attrs[key] = value
-        return apply(FormatterBase.image, (self,), attrs) + '</img>'
+
+        # TODO: finish this
+        if attrs.has_key('width'):
+            url += attrs['width']
+
+        return '{{' + url + '}}'
 
     def code_area(self, on, code_id, code_type='code', show=0, start=-1, step=-1):
         syntax = ''
