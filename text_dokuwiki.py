@@ -194,7 +194,17 @@ class Formatter(FormatterBase):
         return apply(FormatterBase.image, (self,), attrs) + '</img>'
 
     def code_area(self, on, code_id, code_type='code', show=0, start=-1, step=-1):
-        return ('<code>', '</code>')[not on]
+        syntax = ''
+        # switch for Python: http://simonwillison.net/2004/may/7/switch/
+        try:
+            syntax = {
+                'ColorizedPython': 'python',
+                'ColorizedCPlusPlus': 'cpp',
+            }[code_type]
+        except KeyError:
+            pass
+
+        return ('<code %s>' % syntax , '</code>')[not on]
 
     def code_line(self, on):
         return ('', '\n')[on]

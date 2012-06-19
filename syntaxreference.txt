@@ -20,6 +20,10 @@ print code.colorize("abc", 1 + 1)
 # fourth line
 }}}
 
+{{{#!cplusplus
+foo = new something(1, "soo\nice")
+}}}
+
 {{{
 plain
 multiline block
