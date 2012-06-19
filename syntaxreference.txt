@@ -1,3 +1,14 @@
+#acl MoinPagesEditorGroup:read,write,delete,revert All:read
+## Please edit (or translate) system/help pages on the moinmaster wiki ONLY.
+## For more information, please see MoinMaster:MoinPagesEditorGroup.
+#pragma section-numbers off
+#language en
+
+{{{
+#pragma section-numbers off
+#acl All:admin,read,write,delete,revert
+#language en
+}}}
 
 This page tries to use each supported markup element at least once.
 
@@ -23,17 +34,10 @@ Normal text, ''emphasized'', '''strong''', __underline__, ,,subscript,,, ^supers
 Normal text, ''emphasized'', '''strong''', __underline__, ,,subscript,,, ^superscript^, `typewriter` and {{{typewriter}}}.
 
 == Syntax Highlighting ==
-{{{#!python
+ {{{#!python
 # python code
 print code.colorize("abc", 1 + 1)
-# third line
-# fourth line
 }}}
-
-{{{#!cplusplus
-foo = new something(1, "soo\nice")
-}}}
-
 
 = Hyperlinks =
 == Internal ==
@@ -84,7 +88,6 @@ foo = new something(1, "soo\nice")
  * [wiki:MeatBall/InterWiki InterWiki page on MeatBall]
  * [file://servername/full/path/to/file/filename%20with%20spaces.txt Click here to read filename with spaces.txt]
  * me@privacy.net
-
 == Escaping WikiNames ==
 {{{
 Wiki''''''Name
@@ -131,20 +134,17 @@ Wiki``Name
  1. item 2
    a. item 1
    a. item 2
-
-= Code display =
+= Descriptions + Definitions =
 {{{
+ Term:: Description
+ Label:: Definition
+}}}
+ Term:: Description
+ Label:: Definition
+= Code display =
+ {{{
 line 1
     indented 4 characters
-}}}
-
-{{{
-plain
-multiline block
-with some ''text'' in it
-fourth line
-
-sixth line!
 }}}
 
 = Rules =
@@ -168,7 +168,6 @@ sixth line!
 ---------
 ----------
 -------------------------------------------- (not thicker than 10)
-
 
 = Macros =
 {{{
