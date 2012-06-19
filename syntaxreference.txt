@@ -12,3 +12,19 @@ Normal text, ''emphasized'', '''strong''', __underline__, ,,subscript,,, ^supers
 
 Normal text, ''emphasized'', '''strong''', __underline__, ,,subscript,,, ^superscript^, `typewriter` and {{{typewriter}}}.
 
+== Syntax Highlighting ==
+{{{#!python
+# python code
+print code.colorize("abc", 1 + 1)
+# third line
+# fourth line
+}}}
+
+{{{
+plain
+multiline block
+with some ''text'' in it
+fourth line
+
+sixth line!
+}}}

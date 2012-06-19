@@ -194,17 +194,11 @@ class Formatter(FormatterBase):
         return apply(FormatterBase.image, (self,), attrs) + '</img>'
 
     def code_area(self, on, code_id, code_type='code', show=0, start=-1, step=-1):
-        return ('<codearea id="%s">' % code_id, '</codearea')[not on]
+        return ('<code>', '</code>')[not on]
 
     def code_line(self, on):
-        return ('<codeline>', '</codeline')[not on]
+        return ('', '\n')[on]
 
     def code_token(self, on, tok_type):
-        return ('<codetoken type="%s">' % tok_type, '</codetoken')[not on]
-
-    def code_line(self, on):
-        return ('<codeline>', '</codeline')[not on]
-
-    def code_token(self, on, tok_type):
-        return ('<codetoken type="%s">' % tok_type, '</codetoken')[not on]
-
+        # not supported
+        return ''
