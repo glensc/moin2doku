@@ -142,13 +142,13 @@ class Formatter(FormatterBase):
         return ['\n', '\\\n'][not preformatted]
 
     def heading(self, on, depth, **kw):
+		# heading depth reversed in dokuwiki
+        heading_depth = 7 - depth
+
         if on:
-            self._text = []
-            return '\n\n'
+            return u'%s ' % (u'=' * heading_depth)
         else:
-            result =  u'\n%s\n\n' % (u'=' * len("".join(self._text)))
-            self._text = None
-            return result
+            return u' %s' % (u'=' * heading_depth)
 
     def table(self, on, attrs={}, **kw):
         return ['<table>', '</table>'][not on]
