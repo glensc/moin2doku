@@ -177,11 +177,8 @@ class Formatter(FormatterBase):
         return ''
 
     def anchorlink(self, on, name='', **kw):
-        id = kw.get('id',None)
-        extra = ''
-        if id:
-            extra = ' id="%s"' % id
-        return ('<link anchor="%s"%s>' % (name, extra) ,'</link>') [not on]
+        # kw.id not supported, we hope the anchor matches existing heading on page
+        return ('[[#', ']]') [not on]
 
     def underline(self, on, **kw):
         return ['__', '__'][not on]

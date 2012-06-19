@@ -1,4 +1,14 @@
 
+This page tries to use each supported markup element at least once.
+
+{{{
+'''Index'''
+[[TableOfContents(2)]]
+}}}
+'''Index'''
+
+[[TableOfContents(2)]]
+
 = Headers =
 == Header 2 ==
 === Header 3 ===
@@ -23,6 +33,7 @@ print code.colorize("abc", 1 + 1)
 {{{#!cplusplus
 foo = new something(1, "soo\nice")
 }}}
+
 
 = Hyperlinks =
 == Internal ==
