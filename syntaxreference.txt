@@ -24,6 +24,56 @@ print code.colorize("abc", 1 + 1)
 foo = new something(1, "soo\nice")
 }}}
 
+= Hyperlinks =
+== Internal ==
+{{{
+ * MoinMoin
+ * MoinMoin/TextFormatting
+ * MoinMoin/InstallDocs 
+ * ../InstallDocs 
+ * /SubPage
+ * Self:InterWiki
+}}}
+ * MoinMoin
+ * MoinMoin/TextFormatting
+ * MoinMoin/InstallDocs 
+ * ../InstallDocs 
+ * /SubPage
+ * Self:InterWiki
+
+{{{
+[#anchorname Anchor Link]
+}}}
+[#anchorname Anchor Link]
+
+== External ==
+{{{
+ * http://moinmoin.wikiwikiweb.de/
+ * [http://moinmoin.wikiwikiweb.de/]
+ * [http://moinmoin.wikiwikiweb.de/ MoinMoin Wiki]
+ * [http://moinmoin.wikiwikiweb.de/wiki/classic/img/moinmoin.png]
+ * http://moinmoin.wikiwikiweb.de/wiki/classic/img/moinmoin.png
+ * [http://moinmoin.wikiwikiweb.de/wiki/classic/img/moinmoin.png moinmoin.png]
+ * MeatBall:InterWiki
+ * wiki:MeatBall/InterWiki
+ * [wiki:MeatBall/InterWiki]
+ * [wiki:MeatBall/InterWiki InterWiki page on MeatBall]
+ * [file://servername/full/path/to/file/filename%20with%20spaces.txt Click here to read filename with spaces.txt]
+ * me@privacy.net
+}}}
+ * http://moinmoin.wikiwikiweb.de/
+ * [http://moinmoin.wikiwikiweb.de/]
+ * [http://moinmoin.wikiwikiweb.de/ MoinMoin Wiki]
+ * [http://moinmoin.wikiwikiweb.de/wiki/classic/img/moinmoin.png]
+ * http://moinmoin.wikiwikiweb.de/wiki/classic/img/moinmoin.png
+ * [http://moinmoin.wikiwikiweb.de/wiki/classic/img/moinmoin.png moinmoin.png]
+ * MeatBall:InterWiki
+ * wiki:MeatBall/InterWiki
+ * [wiki:MeatBall/InterWiki]
+ * [wiki:MeatBall/InterWiki InterWiki page on MeatBall]
+ * [file://servername/full/path/to/file/filename%20with%20spaces.txt Click here to read filename with spaces.txt]
+ * me@privacy.net
+
 = Bullet list =
 {{{
  * item 1
