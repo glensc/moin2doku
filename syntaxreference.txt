@@ -82,6 +82,13 @@ Wiki``Name
 Wiki''''''Name
 Wiki``Name
 
+= Blockquote =
+{{{
+ This is indented
+  Even more
+}}}
+ This is indented
+  Even more
 
 = Bullet list =
 {{{
@@ -151,3 +158,11 @@ sixth line!
 ----------
 -------------------------------------------- (not thicker than 10)
 
+
+= Macros =
+{{{
+[[Anchor(anchorname)]]
+'''[[PageCount]]''' pages
+}}}
+[[Anchor(anchorname)]]
+'''[[PageCount]]''' pages

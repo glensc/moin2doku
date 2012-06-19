@@ -124,6 +124,7 @@ class Formatter(FormatterBase):
         return ['', '\n'][on]
 
     def listitem(self, on, **kw):
+        # somewhy blockquote uses "listitem" call
         return [(' ' * self.list_depth * 2) + self.list_type + ' ', '\n'][not on]
 
     def code(self, on, **kw):
@@ -172,7 +173,8 @@ class Formatter(FormatterBase):
         return ['|', '|'][not on]
 
     def anchordef(self, id):
-        return '<anchor id="%s"/>' % id
+        # not supported
+        return ''
 
     def anchorlink(self, on, name='', **kw):
         id = kw.get('id',None)
