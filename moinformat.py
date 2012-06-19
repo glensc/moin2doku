@@ -10,13 +10,9 @@ from MoinMoin.request import RequestCLI
 request = RequestCLI()
 formatter = Formatter(request)
 
-text = """
-= Headers =
-== Header 2 ==
-=== Header 3 ===
-==== Header 4 ====
-===== Header 5 =====
-"""
+# pages/playground\(2f\)SyntaxReference/revisions/00000001
+with open('syntaxreference.txt', 'r') as f:
+	text = f.read()
 
 parser = Parser(text, request)
 

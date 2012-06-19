@@ -142,7 +142,7 @@ class Formatter(FormatterBase):
         return ['\n', '\\\n'][not preformatted]
 
     def heading(self, on, depth, **kw):
-		# heading depth reversed in dokuwiki
+        # heading depth reversed in dokuwiki
         heading_depth = 7 - depth
 
         if on:
