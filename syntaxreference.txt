@@ -24,15 +24,6 @@ print code.colorize("abc", 1 + 1)
 foo = new something(1, "soo\nice")
 }}}
 
-{{{
-plain
-multiline block
-with some ''text'' in it
-fourth line
-
-sixth line!
-}}}
-
 = Bullet list =
 {{{
  * item 1
@@ -63,3 +54,41 @@ sixth line!
  1. item 2
    a. item 1
    a. item 2
+
+= Code display =
+{{{
+line 1
+    indented 4 characters
+}}}
+
+{{{
+plain
+multiline block
+with some ''text'' in it
+fourth line
+
+sixth line!
+}}}
+
+= Rules =
+{{{
+--- (not a rule)
+----
+-----
+------
+-------
+--------
+---------
+----------
+-------------------------------------------- (not thicker than 10)
+}}}
+--- (not a rule)
+----
+-----
+------
+-------
+--------
+---------
+----------
+-------------------------------------------- (not thicker than 10)
+

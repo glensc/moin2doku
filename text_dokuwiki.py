@@ -89,7 +89,10 @@ class Formatter(FormatterBase):
 
     def rule(self, size=0, **kw):
         # size not supported
-        return '----\n'
+        if size >= 4:
+            return '----\n'
+        else:
+            return '-' * size + '\n'
 
     def icon(self, type):
         return '<icon type="%s" />' % type
@@ -162,13 +165,13 @@ class Formatter(FormatterBase):
             return u' %s' % (u'=' * heading_depth)
 
     def table(self, on, attrs={}, **kw):
-        return ['<table>', '</table>'][not on]
+        return ''
 
     def table_row(self, on, attrs={}, **kw):
-        return ['<tr>', '</tr>'][not on]
+        return ['|', ''][on]
 
     def table_cell(self, on, attrs={}, **kw):
-        return ['<td>', '</td>'][not on]
+        return ['|', '|'][not on]
 
     def anchordef(self, id):
         return '<anchor id="%s"/>' % id
