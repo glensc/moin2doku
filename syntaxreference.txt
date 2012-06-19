@@ -32,3 +32,17 @@ fourth line
 
 sixth line!
 }}}
+
+= Bullet list =
+{{{
+ * item 1
+
+ * item 2, with gap
+ * item 3
+   * item 3.1
+}}}
+ * item 1
+
+ * item 2, with gap
+ * item 3
+   * item 3.1
