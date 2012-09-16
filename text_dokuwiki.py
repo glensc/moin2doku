@@ -179,7 +179,7 @@ class Formatter(FormatterBase):
         return ''
 
     def table_row(self, on, attrs={}, **kw):
-        return ['', '|'][not on]
+        return ['\n', '|'][not on]
 
     def table_cell(self, on, attrs={}, **kw):
         return ['|', ''][not on]
