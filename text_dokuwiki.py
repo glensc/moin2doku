@@ -79,7 +79,7 @@ class Formatter(FormatterBase):
         return '{{%s|%s}}' % (url, text)
 
     def attachment_image(self, url, **kw):
-        return '{{%s|}' % (url,)
+        return '{{%s|}}' % (url,)
 
     def attachment_drawing(self, url, text, **kw):
         return '{{%s|%s}}' % (url, text)
