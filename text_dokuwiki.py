@@ -11,6 +11,7 @@ from xml.sax import saxutils
 from MoinMoin.formatter.base import FormatterBase
 from MoinMoin import config
 from MoinMoin.Page import Page
+from types import *
 
 # TODO: let base class MoinMoin/formatter/base.py handle not implemented methods
 
@@ -246,3 +247,23 @@ class Formatter(FormatterBase):
     def code_token(self, on, tok_type):
         # not supported
         return ''
+
+    def macro(self, macro_obj, name, args):
+        def email(args):
+            mail = args.replace(' AT ', '@')
+            mail = mail.replace(' DOT ', '.')
+            return '[[mailto:%s|%s]]' % (mail, args)
+
+        try:
+            lookup = {
+                'BR' : '\\\\',
+                'MailTo' : email,
+            }[name]
+        except KeyError:
+            lookup = '/* UndefinedMacro: %s(%s) */' % (name, args)
+
+        if type(lookup) == FunctionType:
+            text = lookup(args)
+        else:
+            text = lookup
+        return text
