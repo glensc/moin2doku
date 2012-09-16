@@ -169,7 +169,7 @@ class Formatter(FormatterBase):
         if on:
             return u'%s ' % (u'=' * heading_depth)
         else:
-            return u' %s' % (u'=' * heading_depth)
+            return u' %s\n' % (u'=' * heading_depth)
 
     def table(self, on, attrs={}, **kw):
         if on:
