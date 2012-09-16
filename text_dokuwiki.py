@@ -248,6 +248,25 @@ class Formatter(FormatterBase):
         # not supported
         return ''
 
+    def comment(self, text):
+        # real comments (lines with two hash marks)
+        if text[0:2] == '##':
+            return "/* %s */" % text[2:]
+
+        # some kind of macro
+        tokens = text.lstrip('#').split(None, 1)
+        if tokens[0] in ('language'):
+            return ''
+
+        if tokens[0] == 'acl':
+            # TODO: fill acl.auth.php
+            return  ''
+
+        if tokens[0] == 'pragma':
+            return "/* pragma: %s */" % " ".join(tokens[1:])
+
+        return "/* %s */" % text.lstrip('#')
+
     def macro(self, macro_obj, name, args):
         def email(args):
             mail = args.replace(' AT ', '@')
