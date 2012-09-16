@@ -271,7 +271,7 @@ class Formatter(FormatterBase):
         def email(args):
             mail = args.replace(' AT ', '@')
             mail = mail.replace(' DOT ', '.')
-            return '[[mailto:%s|%s]]' % (mail, args)
+            return '[[%s|%s]]' % (mail, args)
 
         try:
             lookup = {
