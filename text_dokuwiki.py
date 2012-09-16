@@ -12,12 +12,15 @@ from MoinMoin.formatter.base import FormatterBase
 from MoinMoin import config
 from MoinMoin.Page import Page
 
+# TODO: let base class MoinMoin/formatter/base.py handle not implemented methods
+
 class Formatter(FormatterBase):
     """
         Send Dokuwiki formatted data.
     """
 
     hardspace = '&nbsp;'
+#    hardspace = ' '
 
     def __init__(self, request, **kw):
         apply(FormatterBase.__init__, (self, request), kw)

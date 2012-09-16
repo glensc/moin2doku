@@ -13,9 +13,10 @@ from shutil import copyfile, copystat
 from os import listdir
 from os.path import isdir, basename
 from doku import DokuWiki
+from moinformat import moin2doku
 
 def check_dirs(moin_pages_dir, output_dir):
-  if not isdir(moin_pages_dir):
+  if moin_pages_dir and not isdir(moin_pages_dir):
     print >> sys.stderr, "MoinMoin pages directory doesn't exist!"
     sys.exit(1)
 
@@ -36,6 +37,23 @@ def get_path_names(moin_pages_dir):
 
 def readfile(filename):
   return file(filename, 'r').readlines()
+
+def readfile2(filename):
+  with open(filename, 'r') as f:
+    text = f.read()
+  return unicode(text.decode('utf-8'))
+
+def writefile2(filename, content, overwrite=False):
+  dir = os.path.split(filename)[0]
+  if not isdir(dir):
+    os.makedirs(dir);
+
+  if os.path.exists(filename) and overwrite == False:
+    raise OSError, 'File already exists: %s' % filename
+
+  f = file(filename, 'w')
+  f.write(content)
+  f.close()
 
 def writefile(filename, content, overwrite=False):
   dir = os.path.split(filename)[0]
@@ -183,11 +201,17 @@ def convert_markup(pagename, content):
   return content
 
 def print_help():
-  print "Usage: moinconv.py <moinmoin pages directory> <output directory>"
+  program = sys.argv[0]
+  print "Usage: %s -m <moinmoin pages directory> -d <output directory>" % program
   print "Convert MoinMoin pages to DokuWiki."
   print "Options:"
-  print "-o      - overwrite output files"
-  print "-f FILE - convert signle file"
+  print "-m DIR  - MoinMoin pages dir"
+  print "-d DIR  - Dokuwiki pages dir"
+  print "-f      - overwrite output files"
+  print "-F FILE - convert single file"
+  print ""
+  print "%s -m moinmoin/data/pages /var/lib/dokuwiki/pages" % program
+  print "%s -F moinmoin/data/pages/frontpage -d out" % program
   sys.exit(0)
 
 # return unicode encoded wikiname
@@ -215,11 +239,18 @@ def convertfile(pagedir, overwrite = False):
     print "SKIP %s: skip backups" % pagedir
     return
 
-  content = readfile(curr_rev)
-  content = convert_markup(pagename, content)
+  content = readfile2(curr_rev)
+#  print "content:[%s]" % content
+#  content = convert_markup(pagename, content)
+  content = moin2doku(pagename, content)
+
   out_file = os.path.join(output_dir, dw.wikiFN(pagename))
   print "dokuname: [%s]" % out_file
-  writefile(out_file, content, overwrite = overwrite)
+  try:
+    writefile2(out_file, content, overwrite = overwrite)
+  except OSError, e:
+    print e
+    return 0
 
   ns = dw.getNS(dw.cleanID(pagename))
   copy_attachments(pagedir, ns)
@@ -230,36 +261,41 @@ def convertfile(pagedir, overwrite = False):
 # "main" starts here
 #
 try:
-  opts, args = getopt.getopt(sys.argv[1:], 'hof:', [ "help" ])
+  opts, args = getopt.getopt(sys.argv[1:], 'hfm:d:F:', [ "help" ])
 except getopt.GetoptError, e:
   print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
   sys.exit(1)
 
 overwrite = False
-inputfile = None
+input_file = None
+moin_pages_dir = None
+output_dir = None
 for o, a in opts:
   if o == "--help" or o == "-h":
     print_help()
-  if o == "-o":
-    overwrite = True
   if o == "-f":
-    inputfile = a
+    overwrite = True
+  if o == "-m":
+    moin_pages_dir = a
+  if o == "-d":
+    output_dir = a
+  if o == "-F":
+    input_file = a
 
-if len(args) != 2:
-  print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.'
+if not moin_pages_dir and not input_file:
+  print_help()
+  print >> sys.stderr, 'No input file or page dir to process'
   sys.exit(1)
-
-(moin_pages_dir, output_dir) = args
 
 check_dirs(moin_pages_dir, output_dir)
 
-print 'Input dir is: %s.' % moin_pages_dir
-print 'Output dir is: %s.' % output_dir
+print "Input dir is: '%s'" % moin_pages_dir
+print "Output dir is: '%s'" % output_dir
 
 dw = DokuWiki()
 
-if inputfile != None:
-  res = convertfile(inputfile, overwrite = overwrite)
+if input_file != None:
+  res = convertfile(input_file, overwrite = overwrite)
 else:
   pathnames = get_path_names(moin_pages_dir)
   converted = 0
