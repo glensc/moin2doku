@@ -147,6 +147,13 @@ line 1
     indented 4 characters
 }}}
 
+= Tables =
+== General table layout and HTML like options ==
+{{{
+ ||cell 1||cell2||cell 3||
+}}}
+ ||cell 1||cell2||cell 3||
+
 = Rules =
 {{{
 --- (not a rule)

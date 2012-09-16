@@ -24,6 +24,7 @@ class Formatter(FormatterBase):
         self._current_depth = 1
         self._base_depth = 0
         self.in_pre = 0
+        self.in_table = 0
         self._text = None # XXX does not work with links in headings!!!!!
 
         self.list_depth = 0
@@ -149,6 +150,8 @@ class Formatter(FormatterBase):
 
     def paragraph(self, on, **kw):
         FormatterBase.paragraph(self, on)
+        if self.in_table:
+            return ''
         return ['', '\n\n'][not on]
 
     def linebreak(self, preformatted=1):
@@ -164,13 +167,17 @@ class Formatter(FormatterBase):
             return u' %s' % (u'=' * heading_depth)
 
     def table(self, on, attrs={}, **kw):
+        if on:
+            self.in_table = 1
+        else:
+            self.in_table = 0
         return ''
 
     def table_row(self, on, attrs={}, **kw):
-        return ['|', ''][on]
+        return ['', '|'][not on]
 
     def table_cell(self, on, attrs={}, **kw):
-        return ['|', '|'][not on]
+        return ['|', ''][not on]
 
     def anchordef(self, id):
         # not supported
