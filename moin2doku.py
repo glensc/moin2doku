@@ -217,7 +217,7 @@ def convertfile(pagedir, overwrite = False):
 
   content = readfile(curr_rev)
   content = convert_markup(pagename, content)
-  out_file = dw.wikiFn(pagename)
+  out_file = os.path.join(output_dir, dw.wikiFN(pagename))
   print "dokuname: [%s]" % out_file
   writefile(out_file, content, overwrite = overwrite)
 
