@@ -28,7 +28,7 @@ class Formatter(FormatterBase):
         self._text = None # XXX does not work with links in headings!!!!!
 
         self.list_depth = 0
-        self.list_type = None
+        self.list_type = ' '
         # dokuwiki namespace spearator, ':' or '/', see 'useslash' config
         self.ns_sep = '/';
 
@@ -112,6 +112,7 @@ class Formatter(FormatterBase):
             self.list_type = '-'
         else:
             self.list_depth -= 1
+            self.list_type = ' '
 
         return ['', '\n'][on]
 
@@ -121,6 +122,7 @@ class Formatter(FormatterBase):
             self.list_type = '*'
         else:
             self.list_depth -= 1
+            self.list_type = ' '
 
         return ['', '\n'][on]
 
@@ -150,7 +152,7 @@ class Formatter(FormatterBase):
 
     def paragraph(self, on, **kw):
         FormatterBase.paragraph(self, on)
-        if self.in_table:
+        if self.in_table or self.list_depth:
             return ''
         return ['', '\n\n'][not on]
 
