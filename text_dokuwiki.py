@@ -277,6 +277,7 @@ class Formatter(FormatterBase):
             lookup = {
                 'BR' : '\\\\',
                 'MailTo' : email,
+                'GetText' : args,
             }[name]
         except KeyError:
             lookup = '/* UndefinedMacro: %s(%s) */' % (name, args)
