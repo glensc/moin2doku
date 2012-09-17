@@ -46,14 +46,11 @@ def get_path_names(moin_pages_dir, basenames = False):
   return pathnames
 
 def readfile(filename):
-  return file(filename, 'r').readlines()
-
-def readfile2(filename):
   with open(filename, 'r') as f:
     text = f.read()
   return unicode(text.decode('utf-8'))
 
-def writefile2(filename, content, overwrite=False):
+def writefile(filename, content, overwrite=False):
   dir = os.path.split(filename)[0]
   if not isdir(dir):
     os.makedirs(dir);
@@ -65,24 +62,12 @@ def writefile2(filename, content, overwrite=False):
   f.write(content)
   f.close()
 
-def writefile(filename, content, overwrite=False):
-  dir = os.path.split(filename)[0]
-  if not isdir(dir):
-    os.makedirs(dir);
-
-  if os.path.exists(filename) and overwrite == False:
-    raise OSError, 'File already exists: %s' % filename
-
-  f = file(filename, 'w')
-  f.writelines([it.rstrip() + '\n' for it in content if it])
-  f.close()
-
 def get_current_revision(pagedir):
   rev_dir = os.path.join(pagedir, 'revisions')
   # try "current" file first
   f = os.path.join(pagedir, 'current')
   if os.path.exists(f):
-    rev = readfile(f)[0].rstrip()
+    rev = readfile(f).rstrip()
     try:
       int(rev)
     except ValueError, e:
@@ -257,7 +242,7 @@ def convertfile(pagedir, overwrite = False):
     print "SKIP %s: internal page" % pagedir
     return
 
-  content = readfile2(curr_rev)
+  content = readfile(curr_rev)
 #  print "content:[%s]" % content
 #  content = convert_markup(pagename, content)
   content = moin2doku(pagename, content)
@@ -265,7 +250,7 @@ def convertfile(pagedir, overwrite = False):
   out_file = os.path.join(output_dir, dw.wikiFN(pagename))
   print "dokuname: [%s]" % out_file
   try:
-    writefile2(out_file, content, overwrite = overwrite)
+    writefile(out_file, content, overwrite = overwrite)
   except OSError, e:
     print e
     return 0
