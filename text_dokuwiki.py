@@ -1,9 +1,9 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 """
     MoinMoin - Dokuwiki Formatter
 
-    @copyright: 2000, 2001, 2002 by Jürgen Hermann <jh@web.de>
-    @copyright: 2011-2012 Elan Ruusamäe <glen@delfi.ee>
+    @copyright: 2000, 2001, 2002 by JÃ¼rgen Hermann <jh@web.de>
+    @copyright: 2011-2012 Elan RuusamÃ¤e <glen@delfi.ee>
     @license: GNU GPL, see COPYING for details.
 """
 
@@ -287,3 +287,24 @@ class Formatter(FormatterBase):
         else:
             text = lookup
         return text
+
+    def smiley(self, text):
+        try:
+            # https://www.dokuwiki.org/devel:smileys.conf
+            return {
+                # note: reverse sorted
+                '(./)' : u'âœ“',
+                ':o' : ':-o',
+                ':D' : ':-D',
+                'B)' : ':-D',
+                'B-)' : ':-D',
+                '|)' : '|-)',
+                ':\\' : ':-\\',
+                ':))' : ':-)',
+                ':)' : ':-)',
+                ':(' : ':-(',
+                ':-))' : ':-)',
+                ';)' : ';-)',
+            }[text]
+        except KeyError:
+            return text
