@@ -253,6 +253,10 @@ def convertfile(pagedir, overwrite = False):
     print "SKIP %s: page in underlay" % pagename
     return
 
+  if pagename.count('BadContent') > 0:
+    print "SKIP %s: internal page" % pagedir
+    return
+
   content = readfile2(curr_rev)
 #  print "content:[%s]" % content
 #  content = convert_markup(pagename, content)
