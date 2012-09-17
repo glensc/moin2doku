@@ -10,7 +10,7 @@
 import sys, os, os.path, re
 import getopt
 from shutil import copyfile, copystat
-from os import listdir
+from os import listdir, mkdir
 from os.path import isdir, basename
 from doku import DokuWiki
 from moinformat import moin2doku
@@ -30,6 +30,14 @@ def check_dirs(moin_pages_dir, output_dir):
   if not isdir(output_dir):
     print >> sys.stderr, "Output directory doesn't exist!"
     sys.exit(1)
+
+  pagedir = os.path.join(output_dir, 'pages')
+  if not isdir(pagedir):
+    mkdir(pagedir)
+
+  mediadir = os.path.join(output_dir, 'media')
+  if not isdir(mediadir):
+    mkdir(mediadir)
 
 def get_path_names(moin_pages_dir, basenames = False):
   items = listdir(moin_pages_dir)
@@ -90,18 +98,18 @@ def get_current_revision(pagedir):
 # pagedir = MoinMoin page dir
 # ns = DokuWiki namespace where attachments to copy
 def copy_attachments(pagedir, ns):
-  dir = os.path.join(pagedir, 'attachments')
-  if not isdir(dir):
+  srcdir = os.path.join(pagedir, 'attachments')
+  if not isdir(srcdir):
     return
 
-  attachment_dir = dw.mediaFn(ns)
+  attachment_dir = os.path.join(output_dir, 'media', dw.mediaFN(ns))
   if not isdir(attachment_dir):
     os.makedirs(attachment_dir);
 
-  attachments = listdir(dir)
+  attachments = listdir(srcdir)
   for attachment in attachments:
-    src = os.path.join(dir, attachment)
-    dst = dw.mediaFn(dw.cleanID("%s/%s" % (ns, attachment)))
+    src = os.path.join(srcdir, attachment)
+    dst = os.path.join(output_dir, 'media', dw.mediaFN(dw.cleanID("%s/%s" % (ns, attachment))))
     copyfile(src, dst)
     copystat(src, dst)
 
@@ -247,7 +255,7 @@ def convertfile(pagedir, overwrite = False):
 #  content = convert_markup(pagename, content)
   content = moin2doku(pagename, content)
 
-  out_file = os.path.join(output_dir, dw.wikiFN(pagename))
+  out_file = os.path.join(output_dir, 'pages', dw.wikiFN(pagename))
   print "dokuname: [%s]" % out_file
   try:
     writefile(out_file, content, overwrite = overwrite)

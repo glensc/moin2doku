@@ -17,20 +17,22 @@ require_once DOKU_INC.'inc/init.php';
 require_once DOKU_INC.'inc/common.php';
 require_once DOKU_INC.'inc/cliopts.php';
 
-function strip_datadir($fn) {
+function strip_dir($dir, $fn) {
   global $conf;
-  return end(explode($conf['datadir'].'/', $fn, 2));
+  return end(explode($dir.'/', $fn, 2));
 }
+
+        $fn = $conf['mediadir'].'/'.utf8_encodeFN($id);
 
 switch ($argv[1]) {
 case 'cleanID':
 	echo cleanID($argv[2]);
 	break;
 case 'wikiFN':
-	echo strip_datadir(wikiFN($argv[2]));
+	echo strip_dir($conf['datadir'], wikiFN($argv[2]));
 	break;
-case 'mediaFn':
-	echo mediaFn($argv[2]);
+case 'mediaFN':
+	echo strip_dir($conf['mediadir'], mediaFN($argv[2]));
 	break;
 case 'getNS':
 	echo getNS($argv[2]);
