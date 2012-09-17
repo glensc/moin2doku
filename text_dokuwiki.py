@@ -253,16 +253,24 @@ class Formatter(FormatterBase):
         if text[0:2] == '##':
             return "/* %s */" % text[2:]
 
-        # some kind of macro
+        # Some kind of Processing Instruction
+        # http://moinmo.in/HelpOnProcessingInstructions
         tokens = text.lstrip('#').split(None, 1)
-        if tokens[0] in ('language'):
+        if tokens[0] in ('language', 'format', 'refresh'):
             return ''
 
         if tokens[0] == 'acl':
             # TODO: fill acl.auth.php
             return  ''
 
+        if tokens[0] == 'deprecated':
+            return '<note warning>This page is deprecated</note>\n'
+
+        if tokens[0] == 'redirect':
+            return text
+
         if tokens[0] == 'pragma':
+            # TODO: can do 'description' via 'meta' dokuwiki plugin
             return "/* pragma: %s */" % " ".join(tokens[1:])
 
         return "/* %s */" % text.lstrip('#')
