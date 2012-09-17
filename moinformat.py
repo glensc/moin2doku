@@ -34,6 +34,11 @@ formatter = Formatter(request)
 
 if __name__ == "__main__":
 	# pages/playground\(2f\)SyntaxReference/revisions/00000001
-	with open('syntaxreference.txt', 'r') as f:
+	if len(sys.argv) > 1:
+		inputfile = sys.argv[1]
+	else:
+		inputfile = 'syntaxreference.txt'
+
+	with open(inputfile, 'r') as f:
 		text = f.read()
 	print moin2doku('test', text)
