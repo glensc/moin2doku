@@ -251,7 +251,7 @@ class Formatter(FormatterBase):
     def comment(self, text):
         # real comments (lines with two hash marks)
         if text[0:2] == '##':
-            return "/* %s */" % text[2:]
+            return "/* %s */\n" % text[2:]
 
         # Some kind of Processing Instruction
         # http://moinmo.in/HelpOnProcessingInstructions
