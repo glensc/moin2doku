@@ -273,11 +273,15 @@ class Formatter(FormatterBase):
             mail = mail.replace(' DOT ', '.')
             return '[[%s|%s]]' % (mail, args)
 
+        def smileys(args):
+            return apply(FormatterBase.macro, (self, macro_obj, name, args))
+
         try:
             lookup = {
                 'BR' : '\\\\',
                 'MailTo' : email,
                 'GetText' : args,
+                'ShowSmileys' : smileys,
             }[name]
         except KeyError:
             lookup = '/* UndefinedMacro: %s(%s) */' % (name, args)
