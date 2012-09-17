@@ -169,6 +169,7 @@ def convertfile(pagedir, overwrite = False):
   print "dokuname: [%s]" % out_file
   try:
     writefile(out_file, content, overwrite = overwrite)
+    copystat(curr_rev, out_file)
   except OSError, e:
     print e
     return 0
