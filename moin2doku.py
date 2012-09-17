@@ -280,7 +280,7 @@ except getopt.GetoptError, e:
 overwrite = False
 input_file = None
 moin_pages_dir = None
-moin_underlay_pages = None
+moin_underlay_pages = []
 output_dir = None
 for o, a in opts:
   if o == "--help" or o == "-h":
