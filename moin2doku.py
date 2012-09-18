@@ -179,9 +179,6 @@ def convertfile(pagedir, overwrite = False):
   pagedir  = os.path.abspath(pagedir)
   print "-> %s" % pagedir
 
-  # convert edit-log, it's always present even if current page is not
-  convert_editlog(pagedir, overwrite = overwrite)
-
   curr_rev = get_current_revision(pagedir)
   if curr_rev == None:
     print "SKIP %s: no current revision" % pagedir
@@ -218,6 +215,9 @@ def convertfile(pagedir, overwrite = False):
 
   ns = dw.getNS(dw.cleanID(pagename))
   copy_attachments(pagedir, ns)
+
+  # convert edit-log, it's always present even if current page is not
+  convert_editlog(pagedir, overwrite = overwrite)
 
   return 1
 
