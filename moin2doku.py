@@ -76,8 +76,8 @@ def writefile(filename, content, overwrite=False):
   if os.path.exists(filename) and overwrite == False:
     raise OSError, 'File already exists: %s' % filename
 
-  f = file(filename, 'w')
   f = codecs.open(filename, 'w', 'utf-8')
+  f.write(content)
   f.close()
 
 # pagedir = MoinMoin page dir
