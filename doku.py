@@ -27,6 +27,6 @@ class DokuWiki:
 		if not self.callcache.has_key(key):
 			cmd = ['./doku.php', method ] + args
 			res = subprocess.Popen(cmd, stdin = None, stdout = subprocess.PIPE, stderr = sys.stderr, close_fds = True).communicate()
-			print "%s->%s" % (cmd, res)
-			self.callcache[key] = res[0]
+			self.callcache[key] = unicode(res[0].decode('utf-8'))
+			print "%s->%s" % (cmd, self.callcache[key])
 		return self.callcache[key]
