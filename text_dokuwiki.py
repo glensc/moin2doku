@@ -251,7 +251,7 @@ class Formatter(FormatterBase):
     def comment(self, text):
         # real comments (lines with two hash marks)
         if text[0:2] == '##':
-            return "/* %s */\n" % text[2:]
+            return "/* %s */\n" % text[2:].strip()
 
         # Some kind of Processing Instruction
         # http://moinmo.in/HelpOnProcessingInstructions
@@ -267,13 +267,13 @@ class Formatter(FormatterBase):
             return '<note warning>This page is deprecated</note>\n'
 
         if tokens[0] == 'redirect':
-            return text
+            return text + "\n"
 
         if tokens[0] == 'pragma':
             # TODO: can do 'description' via 'meta' dokuwiki plugin
-            return "/* pragma: %s */" % " ".join(tokens[1:])
+            return "/* pragma: %s */\n" % " ".join(tokens[1:])
 
-        return "/* %s */" % text.lstrip('#')
+        return "/* %s */\n" % text.lstrip('#')
 
     def macro(self, macro_obj, name, args):
         def email(args):
