@@ -169,7 +169,7 @@ def convert_editlog(pagedir, overwrite = False):
     except KeyError:
       action = log.action
 
-    entry = [str(log.ed_time_usecs / USEC), log.addr, action, dw.wikiFN(log.pagename), author]
+    entry = [str(log.ed_time_usecs / USEC), log.addr, action, dw.cleanID(log.pagename), author]
     changes.append("\t".join(entry))
 
   out_file = os.path.join(output_dir, 'meta', dw.metaFN(pagename, '.changes'))
