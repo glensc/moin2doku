@@ -34,6 +34,9 @@ case 'wikiFN':
 case 'mediaFN':
 	echo strip_dir($conf['mediadir'], mediaFN($argv[2]));
 	break;
+case 'metaFN':
+	echo strip_dir($conf['metadir'], metaFN($argv[2], $argv[3]));
+	break;
 case 'getNS':
 	echo getNS($argv[2]);
 	break;

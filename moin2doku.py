@@ -9,6 +9,10 @@
 
 import sys, os, os.path, re
 import getopt
+from MoinMoin import user
+from MoinMoin.request import RequestCLI
+from MoinMoin.logfile import editlog
+from MoinMoin.Page import Page
 from shutil import copyfile, copystat
 from os import listdir, mkdir
 from os.path import isdir, basename
@@ -38,6 +42,10 @@ def check_dirs(moin_pages_dir, output_dir):
   mediadir = os.path.join(output_dir, 'media')
   if not isdir(mediadir):
     mkdir(mediadir)
+
+  metadir = os.path.join(output_dir, 'meta')
+  if not isdir(metadir):
+    mkdir(metadir)
 
 def get_path_names(moin_pages_dir, basenames = False):
   items = listdir(moin_pages_dir)
@@ -133,9 +141,47 @@ def wikiname(filename):
   from MoinMoin import wikiutil
   return wikiutil.unquoteWikiname(basename(filename))
 
+def convert_editlog(pagedir, overwrite = False):
+  changes = []
+  pagedir  = os.path.abspath(pagedir)
+  pagename = wikiname(pagedir)
+  pagelog = Page(request, pagename).getPagePath('edit-log', use_underlay = 0, isfile = 1)
+  edit_log = editlog.EditLog(request, filename = pagelog)
+  USEC = 1000000
+  for log in edit_log:
+    # not supported. perhaps add anyway?
+    if log.action in ('ATTNEW', 'ATTDEL', 'ATTDRW'):
+      continue
+
+    # 1201095949  192.168.2.23    E   start   glen@delfi.ee
+    author = log.hostname
+    if log.userid:
+      userdata = user.User(request, log.userid)
+      if userdata.name:
+        author = userdata.name
+
+    try:
+      action = {
+        'SAVE' : 'E',
+        'SAVENEW' : 'E',
+        'SAVE/REVERT' : 'E',
+      }[log.action]
+    except KeyError:
+      action = log.action
+
+    entry = [str(log.ed_time_usecs / USEC), log.addr, action, log.pagename, author]
+    changes.append("\t".join(entry))
+
+  out_file = os.path.join(output_dir, 'meta', dw.metaFN(pagename, '.changes'))
+  writefile(out_file, "\n".join(changes), overwrite = overwrite)
+
 def convertfile(pagedir, overwrite = False):
   pagedir  = os.path.abspath(pagedir)
   print "-> %s" % pagedir
+
+  # convert edit-log, it's always present even if current page is not
+  convert_editlog(pagedir, overwrite = overwrite)
+
   curr_rev = get_current_revision(pagedir)
   if curr_rev == None:
     print "SKIP %s: no current revision" % pagedir
@@ -147,10 +193,6 @@ def convertfile(pagedir, overwrite = False):
 
   pagename = wikiname(pagedir)
   print "pagename: [%s]" % pagename
-
-  if pagename.count('MoinEditorBackup') > 0:
-    print "SKIP %s: skip backups" % pagedir
-    return
 
   if pagename in moin_underlay_pages:
     print "SKIP %s: page in underlay" % pagename
@@ -218,6 +260,7 @@ print "Input dir is: '%s'" % moin_pages_dir
 print "Output dir is: '%s'" % output_dir
 
 dw = DokuWiki()
+request = RequestCLI()
 
 if input_file != None:
   res = convertfile(input_file, overwrite = overwrite)
@@ -225,6 +268,10 @@ else:
   pathnames = get_path_names(moin_pages_dir)
   converted = 0
   for pathname in pathnames:
+    if pathname.count('MoinEditorBackup') > 0:
+      print "SKIP %s: skip backups" % pathname
+      continue
+
     res = convertfile(pathname, overwrite = overwrite)
     if res != None:
       converted += 1
