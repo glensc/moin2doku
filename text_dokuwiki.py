@@ -281,7 +281,8 @@ class Formatter(FormatterBase):
             mail = mail.replace(' DOT ', '.')
             return '[[%s|%s]]' % (mail, args)
 
-        def smileys(args):
+        # function which will just do what parent class would
+        def inherit(args):
             return apply(FormatterBase.macro, (self, macro_obj, name, args))
 
         try:
@@ -289,7 +290,7 @@ class Formatter(FormatterBase):
                 'BR' : '\\\\',
                 'MailTo' : email,
                 'GetText' : args,
-                'ShowSmileys' : smileys,
+                'ShowSmileys' : inherit,
             }[name]
         except KeyError:
             lookup = '/* UndefinedMacro: %s(%s) */' % (name, args)
