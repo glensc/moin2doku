@@ -30,7 +30,7 @@ case 'cleanID':
 	echo cleanID($argv[2]);
 	break;
 case 'wikiFN':
-	if ($argc > 3) {
+	if ($argc > 3 && $argv[3]) {
 		echo strip_dir($conf['olddir'], wikiFN($argv[2], $argv[3]));
 	} else {
 		echo strip_dir($conf['datadir'], wikiFN($argv[2]));
