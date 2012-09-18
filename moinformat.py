@@ -27,7 +27,7 @@ def moin2doku(pagename, text):
 	parser.format(formatter)
 	sys.stdout = stdout
 
-	return output.getvalue()
+	return unicode(output.getvalue().decode('utf-8'))
 
 request = RequestCLI()
 formatter = Formatter(request)
