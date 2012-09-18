@@ -7,7 +7,7 @@
 #
 # Author: Elan Ruusamäe <glen@pld-linux.org>
 
-import sys, os, os.path, re
+import sys, os, os.path, re, codecs
 import getopt
 from MoinMoin import user
 from MoinMoin.request import RequestCLI
@@ -18,6 +18,8 @@ from os import listdir, mkdir
 from os.path import isdir, basename
 from doku import DokuWiki
 from moinformat import moin2doku
+
+USEC = 1000000
 
 def scan_underlay_pages(dirpath):
   pages = []
@@ -75,33 +77,8 @@ def writefile(filename, content, overwrite=False):
     raise OSError, 'File already exists: %s' % filename
 
   f = file(filename, 'w')
-  f.write(content)
+  f = codecs.open(filename, 'w', 'utf-8')
   f.close()
-
-def get_current_revision(pagedir):
-  rev_dir = os.path.join(pagedir, 'revisions')
-  # try "current" file first
-  f = os.path.join(pagedir, 'current')
-  if os.path.exists(f):
-    rev = readfile(f).rstrip()
-    try:
-      int(rev)
-    except ValueError, e:
-      raise OSError, 'corrupted: %s: %s' % (f, rev)
-  else:
-    if not isdir(rev_dir):
-      return None
-    revisions = listdir(rev_dir)
-    revisions.sort()
-    rev = revisions[-1]
-
-  print "%s rev: %s" % (pagedir, rev)
-  f = os.path.join(rev_dir, rev)
-  if not os.path.exists(f):
-    # deleted pages have '00000002' in current, and no existing file
-    return None
-
-  return f
 
 # pagedir = MoinMoin page dir
 # ns = DokuWiki namespace where attachments to copy
@@ -144,10 +121,10 @@ def wikiname(filename):
 def convert_editlog(pagedir, overwrite = False):
   changes = []
   pagedir  = os.path.abspath(pagedir)
+  print "pagedir: %s" % pagedir
   pagename = wikiname(pagedir)
   pagelog = os.path.join(pagedir, 'edit-log')
   edit_log = editlog.EditLog(request, filename = pagelog)
-  USEC = 1000000
   for log in edit_log:
     # not supported. perhaps add anyway?
     if log.action in ('ATTNEW', 'ATTDEL', 'ATTDRW'):
@@ -163,13 +140,13 @@ def convert_editlog(pagedir, overwrite = False):
     try:
       action = {
         'SAVE' : 'E',
-        'SAVENEW' : 'E',
-        'SAVE/REVERT' : 'E',
+        'SAVENEW' : 'C',
+        'SAVE/REVERT' : 'R',
       }[log.action]
     except KeyError:
       action = log.action
 
-    entry = [str(log.ed_time_usecs / USEC), log.addr, action, dw.cleanID(log.pagename), author]
+    entry = [str(log.ed_time_usecs / USEC), log.addr, action, dw.cleanID(log.pagename), author, log.comment]
     changes.append("\t".join(entry))
 
   out_file = os.path.join(output_dir, 'meta', dw.metaFN(pagename, '.changes'))
@@ -177,41 +154,28 @@ def convert_editlog(pagedir, overwrite = False):
 
 def convertfile(pagedir, overwrite = False):
   pagedir  = os.path.abspath(pagedir)
-  print "-> %s" % pagedir
-
-  curr_rev = get_current_revision(pagedir)
-  if curr_rev == None:
-    print "SKIP %s: no current revision" % pagedir
-    return
-
-  if not os.path.exists(curr_rev):
-    print "SKIP %s: filename missing" % curr_rev
-    return
-
   pagename = wikiname(pagedir)
-  print "pagename: [%s]" % pagename
 
-  if pagename in moin_underlay_pages:
-    print "SKIP %s: page in underlay" % pagename
+  page = Page(request, pagename)
+  if page.isUnderlayPage():
+    print "SKIP UNDERLAY"
     return
 
-  if pagename.count('BadContent') > 0:
-    print "SKIP %s: internal page" % pagedir
-    return
+  current_rev = page.current_rev()
+  for rev in page.getRevList():
+    page = Page(request, pagename, rev = rev)
+    pagefile, realrev, exists = page.get_rev(rev = rev);
 
-  content = readfile(curr_rev)
-#  print "content:[%s]" % content
-#  content = convert_markup(pagename, content)
-  content = moin2doku(pagename, content)
+    content = moin2doku(pagename, page.get_raw_body())
 
-  out_file = os.path.join(output_dir, 'pages', dw.wikiFN(pagename))
-  print "dokuname: [%s]" % out_file
-  try:
+    if rev == current_rev:
+      out_file = os.path.join(output_dir, 'pages', dw.wikiFN(pagename))
+    else:
+      mtime = str(page.mtime_usecs() / USEC)
+      out_file = os.path.join(output_dir, 'attic', dw.wikiFN(pagename, mtime))
+
     writefile(out_file, content, overwrite = overwrite)
-    copystat(curr_rev, out_file)
-  except OSError, e:
-    print e
-    return 0
+    copystat(pagefile, out_file)
 
   ns = dw.getNS(dw.cleanID(pagename))
   copy_attachments(pagedir, ns)
