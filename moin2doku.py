@@ -168,6 +168,11 @@ def convertfile(pagedir, overwrite = False):
 
     content = moin2doku(pagename, page.get_raw_body())
 
+    if not page.mtime_usecs():
+      print "NO REVISION: %s" % page.mtime_usecs()
+      # TODO file exists, but no mtime, recover from filename
+      continue
+
     if rev == current_rev:
       out_file = os.path.join(output_dir, 'pages', dw.wikiFN(pagename))
     else:
