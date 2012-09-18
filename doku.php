@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 # -*- coding: utf-8 -*-
-# Setup VIM: ex: et ts=2 sw=2 :
+# Setup VIM: ex: noet ts=2 sw=2 :
 #
 # PHP side Bridge of accessing DokuWiki functions from Python.
 # See README for details.
@@ -21,8 +21,6 @@ function strip_dir($dir, $fn) {
   global $conf;
   return end(explode($dir.'/', $fn, 2));
 }
-
-        $fn = $conf['mediadir'].'/'.utf8_encodeFN($id);
 
 switch ($argv[1]) {
 case 'cleanID':
