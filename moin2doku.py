@@ -145,7 +145,7 @@ def convert_editlog(pagedir, overwrite = False):
   changes = []
   pagedir  = os.path.abspath(pagedir)
   pagename = wikiname(pagedir)
-  pagelog = Page(request, pagename).getPagePath('edit-log', use_underlay = 0, isfile = 1)
+  pagelog = os.path.join(pagedir, 'edit-log')
   edit_log = editlog.EditLog(request, filename = pagelog)
   USEC = 1000000
   for log in edit_log:
