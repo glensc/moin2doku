@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 from MoinMoin import wikimacro, wikiutil
 from MoinMoin.Page import Page
 from MoinMoin.parser.wiki import Parser
