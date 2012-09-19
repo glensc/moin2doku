@@ -163,17 +163,20 @@ def convertfile(pagedir, output = None, overwrite = False):
     pagefile, realrev, exists = page.get_rev(rev = rev);
 
     content = moin2doku(pagename, page.get_raw_body())
+    mtime = page.mtime_usecs() / USEC
 
-    if not page.mtime_usecs():
-      print "NO REVISION: %s" % page.mtime_usecs()
-      # TODO file exists, but no mtime, recover from filename
-      continue
+    if not mtime:
+      if os.path.exists(pagefile):
+        mtime = int(os.path.getmtime(pagefile))
+
+      if not mtime:
+        print "NO REVISION: for %s" % pagefile
+        continue
 
     if rev == current_rev:
       out_file = os.path.join(output_dir, 'pages', dw.wikiFN(output))
     else:
-      mtime = str(page.mtime_usecs() / USEC)
-      out_file = os.path.join(output_dir, 'attic', dw.wikiFN(output, mtime))
+      out_file = os.path.join(output_dir, 'attic', dw.wikiFN(output, str(mtime)))
 
     writefile(out_file, content, overwrite = overwrite)
     copystat(pagefile, out_file)
