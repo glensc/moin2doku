@@ -9,7 +9,7 @@
 
 import sys, os, os.path, re, codecs
 import getopt
-from MoinMoin import user
+from MoinMoin import user, wikiutil
 from MoinMoin.request import RequestCLI
 from MoinMoin.logfile import editlog
 from MoinMoin.Page import Page
@@ -108,14 +108,15 @@ def print_help():
 # return unicode encoded wikiname
 # input is a dir from moinmoin pages/ dir
 def wikiname(filename):
-  from MoinMoin import wikiutil
   return wikiutil.unquoteWikiname(basename(filename))
 
-def convert_editlog(pagedir, overwrite = False):
+def convert_editlog(pagedir, output = None, overwrite = False):
   changes = []
   pagedir  = os.path.abspath(pagedir)
   print "pagedir: %s" % pagedir
   pagename = wikiname(pagedir)
+  if not output:
+    output = pagename
   pagelog = os.path.join(pagedir, 'edit-log')
   edit_log = editlog.EditLog(request, filename = pagelog)
   for log in edit_log:
@@ -142,12 +143,14 @@ def convert_editlog(pagedir, overwrite = False):
     entry = [str(log.ed_time_usecs / USEC), log.addr, action, dw.cleanID(log.pagename), author, log.comment]
     changes.append("\t".join(entry))
 
-  out_file = os.path.join(output_dir, 'meta', dw.metaFN(pagename, '.changes'))
+  out_file = os.path.join(output_dir, 'meta', dw.metaFN(output, '.changes'))
   writefile(out_file, "\n".join(changes), overwrite = overwrite)
 
-def convertfile(pagedir, overwrite = False):
+def convertfile(pagedir, output = None, overwrite = False):
   pagedir  = os.path.abspath(pagedir)
   pagename = wikiname(pagedir)
+  if not output:
+    output = pagename
 
   page = Page(request, pagename)
   if page.isUnderlayPage():
@@ -167,19 +170,19 @@ def convertfile(pagedir, overwrite = False):
       continue
 
     if rev == current_rev:
-      out_file = os.path.join(output_dir, 'pages', dw.wikiFN(pagename))
+      out_file = os.path.join(output_dir, 'pages', dw.wikiFN(output))
     else:
       mtime = str(page.mtime_usecs() / USEC)
-      out_file = os.path.join(output_dir, 'attic', dw.wikiFN(pagename, mtime))
+      out_file = os.path.join(output_dir, 'attic', dw.wikiFN(output, mtime))
 
     writefile(out_file, content, overwrite = overwrite)
     copystat(pagefile, out_file)
 
-  ns = dw.getNS(dw.cleanID(pagename))
+  ns = dw.getNS(dw.cleanID(output))
   copy_attachments(pagedir, ns)
 
   # convert edit-log, it's always present even if current page is not
-  convert_editlog(pagedir, overwrite = overwrite)
+  convert_editlog(pagedir, output = output, overwrite = overwrite)
 
   return 1
 
@@ -224,8 +227,15 @@ request = RequestCLI()
 if input_file != None:
   res = convertfile(input_file, overwrite = overwrite)
 else:
-  pathnames = get_path_names(moin_pages_dir)
   converted = 0
+
+  # special: process frontpage so that MoinMoin frontpage gets saved as DokuWiki frontpage
+  page = wikiutil.getFrontPage(request)
+  res = convertfile(page.getPagePath(), output = dw.getId(), overwrite = overwrite)
+  if res != None:
+    converted += 1
+
+  pathnames = get_path_names(moin_pages_dir)
   for pathname in pathnames:
     if pathname.count('MoinEditorBackup') > 0:
       print "SKIP %s: skip backups" % pathname

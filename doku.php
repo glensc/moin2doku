@@ -45,6 +45,9 @@ case 'metaFN':
 case 'getNS':
 	echo getNS($argv[2]);
 	break;
+case 'getId':
+	echo getId();
+	break;
 default:
 	die("Unknown knob: {$argv[1]}");
 }
