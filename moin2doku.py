@@ -98,6 +98,7 @@ def print_help():
   print "Options:"
   print "-m DIR  - MoinMoin pages dir"
   print "-d DIR  - Dokuwiki pages dir"
+  print "-a      - Convert Attic pages (history)"
   print "-f      - overwrite output files"
   print "-F FILE - convert single file"
   print ""
@@ -179,7 +180,12 @@ def convertfile(pagedir, output = None, overwrite = False):
     return
 
   current_rev = page.current_rev()
-  for rev in page.getRevList():
+  if convert_attic:
+    revs = page.getRevList()
+  else:
+    revs = [current_rev]
+
+  for rev in revs:
     page = Page(request, pagename, rev = rev)
     pagefile, realrev, exists = page.get_rev(rev = rev);
 
@@ -215,7 +221,7 @@ def convertfile(pagedir, output = None, overwrite = False):
 # "main" starts here
 #
 try:
-  opts, args = getopt.getopt(sys.argv[1:], 'hfm:d:F:', [ "help" ])
+  opts, args = getopt.getopt(sys.argv[1:], 'hfam:d:F:', [ "help" ])
 except getopt.GetoptError, e:
   print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
   sys.exit(1)
@@ -224,6 +230,7 @@ overwrite = False
 input_file = None
 moin_pages_dir = None
 output_dir = None
+convert_attic = False
 for o, a in opts:
   if o == "--help" or o == "-h":
     print_help()
@@ -231,6 +238,8 @@ for o, a in opts:
     overwrite = True
   if o == "-m":
     moin_pages_dir = a
+  if o == "-a":
+    convert_attic = True
   if o == "-d":
     output_dir = a
   if o == "-F":
