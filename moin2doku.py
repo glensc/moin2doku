@@ -21,13 +21,6 @@ from moinformat import moin2doku
 
 USEC = 1000000
 
-def scan_underlay_pages(dirpath):
-  pages = []
-  paths = get_path_names(dirpath, basenames = True)
-  for path in paths:
-    pages.append(wikiname(path))
-  return pages
-
 def check_dirs(moin_pages_dir, output_dir):
   if moin_pages_dir and not isdir(moin_pages_dir):
     print >> sys.stderr, "MoinMoin pages directory doesn't exist!"
@@ -194,7 +187,7 @@ def convertfile(pagedir, overwrite = False):
 # "main" starts here
 #
 try:
-  opts, args = getopt.getopt(sys.argv[1:], 'hfm:u:d:F:', [ "help" ])
+  opts, args = getopt.getopt(sys.argv[1:], 'hfm:d:F:', [ "help" ])
 except getopt.GetoptError, e:
   print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
   sys.exit(1)
@@ -202,7 +195,6 @@ except getopt.GetoptError, e:
 overwrite = False
 input_file = None
 moin_pages_dir = None
-moin_underlay_pages = []
 output_dir = None
 for o, a in opts:
   if o == "--help" or o == "-h":
@@ -211,8 +203,6 @@ for o, a in opts:
     overwrite = True
   if o == "-m":
     moin_pages_dir = a
-  if o == "-u":
-    moin_underlay_pages = scan_underlay_pages(a)
   if o == "-d":
     output_dir = a
   if o == "-F":
