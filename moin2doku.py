@@ -111,7 +111,6 @@ def wikiname(filename):
   return wikiutil.unquoteWikiname(basename(filename))
 
 def convert_editlog(pagedir, output = None, overwrite = False):
-  changes = []
   pagedir  = os.path.abspath(pagedir)
   print "pagedir: %s" % pagedir
   pagename = wikiname(pagedir)
@@ -119,6 +118,8 @@ def convert_editlog(pagedir, output = None, overwrite = False):
     output = pagename
   pagelog = os.path.join(pagedir, 'edit-log')
   edit_log = editlog.EditLog(request, filename = pagelog)
+
+  changes = {}
   for log in edit_log:
     # not supported. perhaps add anyway?
     if log.action in ('ATTNEW', 'ATTDEL', 'ATTDRW'):
@@ -140,9 +141,29 @@ def convert_editlog(pagedir, output = None, overwrite = False):
     except KeyError:
       action = log.action
 
-    entry = [str(log.ed_time_usecs / USEC), log.addr, action, dw.cleanID(log.pagename), author, log.comment]
-    changes.append("\t".join(entry))
+    mtime = str(log.ed_time_usecs / USEC)
+    changes[mtime] = "\t".join([mtime, log.addr, action, dw.cleanID(log.pagename), author, log.comment])
 
+  # see if we have missing entries, try to recover
+  page = Page(request, pagename)
+  if len(page.getRevList()) != len(changes):
+    print "RECOVERING edit-log, missing %d entries" % (len(page.getRevList()) - len(changes))
+    for rev in page.getRevList():
+      page = Page(request, pagename, rev = rev)
+      mtime = page.mtime_usecs() / USEC
+
+      if not mtime:
+        pagefile, realrev, exists = page.get_rev(rev = rev);
+        if os.path.exists(pagefile):
+          mtime = int(os.path.getmtime(pagefile))
+          print "Recovered %s: %s" % (rev, mtime)
+
+      mtime = str(mtime)
+      if not changes.has_key(mtime):
+        changes[mtime] = "\t".join([mtime, '127.0.0.1', '?', dw.cleanID(pagename), 'root', 'recovered entry'])
+        print "ADDING %s" % mtime
+
+  changes = sorted(changes.values())
   out_file = os.path.join(output_dir, 'meta', dw.metaFN(output, '.changes'))
   writefile(out_file, "\n".join(changes), overwrite = overwrite)
 
@@ -168,6 +189,7 @@ def convertfile(pagedir, output = None, overwrite = False):
     if not mtime:
       if os.path.exists(pagefile):
         mtime = int(os.path.getmtime(pagefile))
+        print "recovered %s: %s" % (rev, mtime)
 
       if not mtime:
         print "NO REVISION: for %s" % pagefile

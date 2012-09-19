@@ -20,6 +20,9 @@ require_once DOKU_INC.'inc/cliopts.php';
 # disable gzip regardless of config, then we don't have to compress when converting
 $conf['compression'] = 0; //compress old revisions: (0: off) ('gz': gnuzip) ('bz2': bzip)
 
+# override start page, as there's currently configured temporary frontpage
+$conf['start'] = 'start'; //name of start page
+
 function strip_dir($dir, $fn) {
   global $conf;
   return end(explode($dir.'/', $fn, 2));
