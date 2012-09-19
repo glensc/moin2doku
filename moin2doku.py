@@ -62,7 +62,7 @@ def readfile(filename):
   return unicode(text.decode('utf-8'))
 
 def writefile(filename, content, overwrite=False):
-  dir = os.path.split(filename)[0]
+  dir = os.path.dirname(os.path.abspath(filename))
   if not isdir(dir):
     os.makedirs(dir);
 
@@ -101,6 +101,7 @@ def print_help():
   print "-a      - Convert Attic pages (history)"
   print "-f      - overwrite output files"
   print "-F FILE - convert single file"
+  print "-r FILE - write config for redirect plugin"
   print ""
   print "%s -m moinmoin/data/pages /var/lib/dokuwiki/pages" % program
   print "%s -F moinmoin/data/pages/frontpage -d out" % program
@@ -179,7 +180,9 @@ def convertfile(pagedir, output = None, overwrite = False):
     print "SKIP UNDERLAY"
     return
 
+  current_exists = page.exists()
   current_rev = page.current_rev()
+
   if convert_attic:
     revs = page.getRevList()
   else:
@@ -188,10 +191,14 @@ def convertfile(pagedir, output = None, overwrite = False):
   for rev in revs:
     page = Page(request, pagename, rev = rev)
     pagefile, realrev, exists = page.get_rev(rev = rev);
+    print "EXISTS loop: %s " % exists
 
     mtime = page.mtime_usecs() / USEC
 
     if not mtime:
+      if os.path.exists(pagefile) != exists:
+        raise Exception, "IT SHOULD NOT HAPPEN"
+
       if os.path.exists(pagefile):
         mtime = int(os.path.getmtime(pagefile))
         print "recovered %s: %s" % (rev, mtime)
@@ -210,16 +217,28 @@ def convertfile(pagedir, output = None, overwrite = False):
 
     content = moin2doku(pagename, page.get_raw_body())
     if len(content) == 0:
-      raise Exception, "No content"
+#      raise Exception, "No content"
+      print "NO CONTENT: exists: %s,%s" % (exists, os.path.exists(pagefile))
 
     writefile(out_file, content, overwrite = overwrite)
     copystat(pagefile, out_file)
 
-  ns = dw.getNS(dw.cleanID(output))
+  ID = dw.cleanID(output)
+  ns = dw.getNS(ID)
   copy_attachments(pagedir, ns)
 
   # convert edit-log, it's always present even if current page is not
   convert_editlog(pagedir, output = output, overwrite = overwrite)
+
+  # add to redirect.conf if filenames differ
+  # and page must exist (no redirect for deleted pages)
+  if redirect_conf and current_exists:
+    # redirect dokuwiki plugin is quite picky
+    # - it doesn't understand if entries are not lowercase
+    # - it doesn't understand if paths are separated by forward slash
+    old_page = pagename.lower().replace('/', ':').replace(' ', '_')
+    if old_page != ID:
+      redirect_map[old_page] = ID
 
   return 1
 
@@ -227,7 +246,7 @@ def convertfile(pagedir, output = None, overwrite = False):
 # "main" starts here
 #
 try:
-  opts, args = getopt.getopt(sys.argv[1:], 'hfam:d:F:', [ "help" ])
+  opts, args = getopt.getopt(sys.argv[1:], 'hfam:d:F:r:', [ "help" ])
 except getopt.GetoptError, e:
   print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
   sys.exit(1)
@@ -237,6 +256,8 @@ input_file = None
 moin_pages_dir = None
 output_dir = None
 convert_attic = False
+redirect_conf = False
+redirect_map = {}
 for o, a in opts:
   if o == "--help" or o == "-h":
     print_help()
@@ -246,6 +267,8 @@ for o, a in opts:
     moin_pages_dir = a
   if o == "-a":
     convert_attic = True
+  if o == "-r":
+    redirect_conf = a
   if o == "-d":
     output_dir = a
   if o == "-F":
@@ -285,3 +308,8 @@ else:
     if res != None:
       converted += 1
   print "Processed %d files, converted %d" % (len(pathnames), converted)
+
+if redirect_conf:
+  print "Writing %s: %d items" % (redirect_conf, len(redirect_map))
+  content = '\n'.join('\t'.join(pair) for pair in redirect_map.items())
+  writefile(redirect_conf, content, overwrite = overwrite)
