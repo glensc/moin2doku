@@ -189,7 +189,6 @@ def convertfile(pagedir, output = None, overwrite = False):
     page = Page(request, pagename, rev = rev)
     pagefile, realrev, exists = page.get_rev(rev = rev);
 
-    content = moin2doku(pagename, page.get_raw_body())
     mtime = page.mtime_usecs() / USEC
 
     if not mtime:
@@ -203,8 +202,15 @@ def convertfile(pagedir, output = None, overwrite = False):
 
     if rev == current_rev:
       out_file = os.path.join(output_dir, 'pages', dw.wikiFN(output))
+      if not convert_attic and not exists:
+        # if not converting attic, allow current version may not exist anymore
+        continue
     else:
       out_file = os.path.join(output_dir, 'attic', dw.wikiFN(output, str(mtime)))
+
+    content = moin2doku(pagename, page.get_raw_body())
+    if len(content) == 0:
+      raise Exception, "No content"
 
     writefile(out_file, content, overwrite = overwrite)
     copystat(pagefile, out_file)
