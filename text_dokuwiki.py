@@ -33,8 +33,6 @@ class Formatter(FormatterBase):
 
         self.list_depth = 0
         self.list_type = ' '
-        # dokuwiki namespace spearator, ':' or '/', see 'useslash' config
-        self.ns_sep = '/';
 
     def _escape(self, text, extra_mapping={"'": "&apos;", '"': "&quot;"}):
         return saxutils.escape(text, extra_mapping)
@@ -61,10 +59,10 @@ class Formatter(FormatterBase):
         return '<html>' + markup + '</html>'
 
     def pagelink(self, on, pagename='', page=None, **kw):
-        apply(FormatterBase.pagelink, (self, on, pagename, page), kw)
-        if page is None:
-            page = Page(self.request, pagename, formatter=self)
-        return page.link_to(self.request, on=on, **kw)
+        if on:
+            return '[[:' + ":".join(pagename.split("/")) + "|"
+        else:
+            return ']]'
 
     def interwikilink(self, on, interwiki='', pagename='', **kw):
         if on:
@@ -73,7 +71,7 @@ class Formatter(FormatterBase):
             return ']]'
 
     def url(self, on, url='', css=None, **kw):
-        return ('[[%s|' % (self._escape(url)), ']]') [not on]
+        return ('[[%s|' % (self._escape(url)), ']]')[not on]
 
     def attachment_link(self, url, text, **kw):
         return '{{%s|%s}}' % (url, text)
