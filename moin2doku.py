@@ -289,7 +289,11 @@ else:
 		filter = name_filter
 
 	# get list of all pages in wiki
+	# hide underlay dir temporarily
+	underlay_dir = request.rootpage.cfg.data_underlay_dir
+	request.rootpage.cfg.data_underlay_dir = None
 	pages = request.rootpage.getPageDict(user = '', exists = not convert_attic, filter = filter)
+	request.rootpage.cfg.data_underlay_dir = underlay_dir
 
 	# insert frontpage,
 	# so that MoinMoin frontpage gets saved as DokuWiki frontpage based on their configs
