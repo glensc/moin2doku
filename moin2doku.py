@@ -156,6 +156,8 @@ def convertfile(page, output = None, overwrite = False):
 		output = pagename
 
 	if page.isUnderlayPage():
+		print "underlay: %s" % page.request.cfg.data_underlay_dir
+		print "underlay: %s" % request.cfg.data_underlay_dir
 		print "SKIP UNDERLAY: %s" % pagename
 		return False
 
@@ -276,7 +278,7 @@ pages = {}
 
 if convert_page != None:
 	pagename = wikiname(convert_page)
-	pages[pagename] = Page(request, pagename)
+	pages[pagename] = pagename
 else:
 	filter = None
 	if page_filter:
@@ -288,7 +290,9 @@ else:
 	# hide underlay dir temporarily
 	underlay_dir = request.rootpage.cfg.data_underlay_dir
 	request.rootpage.cfg.data_underlay_dir = None
-	pages = request.rootpage.getPageDict(user = '', exists = not convert_attic, filter = filter)
+	pages = request.rootpage.getPageList(user = '', exists = not convert_attic, filter = filter)
+	pages = dict(zip(pages, pages))
+	# restore
 	request.rootpage.cfg.data_underlay_dir = underlay_dir
 
 	# insert frontpage,
@@ -296,12 +300,12 @@ else:
 	frontpage = wikiutil.getFrontPage(request)
 	if pages.has_key(frontpage.page_name):
 		del pages[frontpage.page_name]
-	pages[dw.getId()] = frontpage
+	pages[dw.getId()] = frontpage.page_name
 
 converted = 0
-for pagename, page in pages.items():
-	print "%s" % page.getPagePath()
-	res = convertfile(page, output = pagename, overwrite = overwrite)
+for output, pagename in pages.items():
+	page = Page(request, pagename)
+	res = convertfile(page, output = output, overwrite = overwrite)
 	if res != None:
 		print "Converted: %s" % pagename
 		converted += 1
