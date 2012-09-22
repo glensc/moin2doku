@@ -268,16 +268,17 @@ if input_file != None:
 else:
 	converted = 0
 
-	# special: process frontpage so that MoinMoin frontpage gets saved as DokuWiki frontpage
-	page = wikiutil.getFrontPage(request)
-	res = convertfile(page.getPagePath(), output = dw.getId(), overwrite = overwrite)
-	if res != None:
-		converted += 1
-
 	# get list of all pages in wiki
 	pages = request.rootpage.getPageDict(user = '', exists = not convert_attic)
-	for page in pages.values():
-		res = convertfile(page.getPagePath(), overwrite = overwrite)
+
+	# insert frontpage,
+	# so that MoinMoin frontpage gets saved as DokuWiki frontpage based on their configs
+	frontpage = wikiutil.getFrontPage(request)
+	del pages[frontpage.page_name]
+	pages[dw.getId()] = frontpage
+
+	for pagename, page in pages.items():
+		res = convertfile(page.getPagePath(), output = pagename, overwrite = overwrite)
 		if res != None:
 			converted += 1
 	print "Processed %d files, converted %d" % (len(pages) + 1, converted)
