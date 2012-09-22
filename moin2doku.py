@@ -94,14 +94,12 @@ def print_help():
 def wikiname(filename):
 	return wikiutil.unquoteWikiname(basename(filename))
 
-def convert_editlog(pagedir, output = None, overwrite = False):
-	pagedir = os.path.abspath(pagedir)
-	print "pagedir: %s" % pagedir
+def convert_editlog(page, output = None, overwrite = False):
+	pagedir = page.getPagePath()
 	pagename = wikiname(pagedir)
 	if not output:
 		output = pagename
-	pagelog = os.path.join(pagedir, 'edit-log')
-	edit_log = editlog.EditLog(request, filename = pagelog)
+	edit_log = editlog.EditLog(request, page.getPagePath('edit-log'))
 
 	changes = {}
 	for log in edit_log:
@@ -209,7 +207,7 @@ def convertfile(page, output = None, overwrite = False):
 	copy_attachments(pagedir, ns)
 
 	# convert edit-log, it's always present even if current page is not
-	convert_editlog(pagedir, output = output, overwrite = overwrite)
+	convert_editlog(page, output = output, overwrite = overwrite)
 
 	# add to redirect.conf if filenames differ
 	# and page must exist (no redirect for deleted pages)
