@@ -151,13 +151,12 @@ def convert_editlog(pagedir, output = None, overwrite = False):
 	out_file = os.path.join(output_dir, 'meta', dw.metaFN(output, '.changes'))
 	writefile(out_file, "\n".join(changes), overwrite = overwrite)
 
-def convertfile(pagedir, output = None, overwrite = False):
-	pagedir = os.path.abspath(pagedir)
+def convertfile(page, output = None, overwrite = False):
+	pagedir = page.getPagePath()
 	pagename = wikiname(pagedir)
 	if not output:
 		output = pagename
 
-	page = Page(request, pagename)
 	if page.isUnderlayPage():
 		print "SKIP UNDERLAY: %s" % pagename
 		return False
@@ -237,13 +236,13 @@ else:
 sys.stdout = codecs.getwriter(default_encoding)(sys.stdout);
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], 'hfad:F:r:i:I:', [ "help" ])
+	opts, args = getopt.getopt(sys.argv[1:], 'hfad:p:r:i:I:', [ "help" ])
 except getopt.GetoptError, e:
 	print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
 	sys.exit(1)
 
 overwrite = False
-input_file = None
+convert_page = None
 output_dir = None
 convert_attic = False
 redirect_conf = False
@@ -264,8 +263,8 @@ for o, a in opts:
 		page_filter.extend(readfile(a).split("\n"))
 	if o == "-d":
 		output_dir = a
-	if o == "-F":
-		input_file = a
+	if o == "-p":
+		convert_page = a
 
 if not output_dir:
 	print_help()
@@ -277,8 +276,10 @@ init_dirs(output_dir)
 dw = DokuWiki()
 request = RequestCLI()
 
-if input_file != None:
-	res = convertfile(input_file, overwrite = overwrite)
+if convert_page != None:
+	pagename = wikiname(convert_page)
+	page = Page(request, pagename)
+	res = convertfile(page, overwrite = overwrite)
 else:
 	converted = 0
 
@@ -304,7 +305,7 @@ else:
 
 	for pagename, page in pages.items():
 		print "%s" % page.getPagePath()
-		res = convertfile(page.getPagePath(), output = pagename, overwrite = overwrite)
+		res = convertfile(page, output = pagename, overwrite = overwrite)
 		if res != None:
 			print "Converted: %s" % pagename
 			converted += 1
