@@ -1,5 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# Setup VIM: ex: noet ts=2 sw=2 :
+#
+# Module for doing DokuWiki output conversion.
+# See README for details.
+#
+# Author: Elan Ruusamäe <glen@pld-linux.org>
+# Version: 1.0
+
 from MoinMoin import wikimacro, wikiutil
 from MoinMoin.Page import Page
 from MoinMoin.parser.wiki import Parser

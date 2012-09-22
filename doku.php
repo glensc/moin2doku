@@ -7,6 +7,7 @@
 # See README for details.
 #
 # Author: Elan Ruusamäe <glen@pld-linux.org>
+# Version: 1.0
 #
 # You should probably adjust path to DOKU_INC.
 
