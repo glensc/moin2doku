@@ -237,7 +237,7 @@ else:
 sys.stdout = codecs.getwriter(default_encoding)(sys.stdout);
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], 'hfad:F:r:', [ "help" ])
+	opts, args = getopt.getopt(sys.argv[1:], 'hfad:F:r:i:I:', [ "help" ])
 except getopt.GetoptError, e:
 	print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
 	sys.exit(1)
@@ -248,6 +248,7 @@ output_dir = None
 convert_attic = False
 redirect_conf = False
 redirect_map = {}
+page_filter = []
 for o, a in opts:
 	if o == "--help" or o == "-h":
 		print_help()
@@ -257,6 +258,10 @@ for o, a in opts:
 		convert_attic = True
 	if o == "-r":
 		redirect_conf = a
+	if o == "-i":
+		page_filter.append(a)
+	if o == "-I":
+		page_filter.extend(readfile(a).split("\n"))
 	if o == "-d":
 		output_dir = a
 	if o == "-F":
@@ -277,8 +282,14 @@ if input_file != None:
 else:
 	converted = 0
 
+	filter = None
+	if page_filter:
+		def name_filter(name):
+			return name not in page_filter
+		filter = name_filter
+
 	# get list of all pages in wiki
-	pages = request.rootpage.getPageDict(user = '', exists = not convert_attic)
+	pages = request.rootpage.getPageDict(user = '', exists = not convert_attic, filter = filter)
 
 	# insert frontpage,
 	# so that MoinMoin frontpage gets saved as DokuWiki frontpage based on their configs
@@ -291,7 +302,7 @@ else:
 		res = convertfile(page.getPagePath(), output = pagename, overwrite = overwrite)
 		if res != None:
 			converted += 1
-	print "Processed %d files, converted %d" % (len(pages) + 1, converted)
+	print "Processed %d files, converted %d" % (len(pages), converted)
 
 if redirect_conf:
 	print "Writing %s: %d items" % (redirect_conf, len(redirect_map))
