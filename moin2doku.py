@@ -275,14 +275,12 @@ init_dirs(output_dir)
 
 dw = DokuWiki()
 request = RequestCLI()
+pages = {}
 
 if convert_page != None:
 	pagename = wikiname(convert_page)
-	page = Page(request, pagename)
-	res = convertfile(page, overwrite = overwrite)
+	pages[pagename] = Page(request, pagename)
 else:
-	converted = 0
-
 	filter = None
 	if page_filter:
 		def name_filter(name):
@@ -303,13 +301,14 @@ else:
 		del pages[frontpage.page_name]
 	pages[dw.getId()] = frontpage
 
-	for pagename, page in pages.items():
-		print "%s" % page.getPagePath()
-		res = convertfile(page, output = pagename, overwrite = overwrite)
-		if res != None:
-			print "Converted: %s" % pagename
-			converted += 1
-	print "Processed %d files, converted %d" % (len(pages), converted)
+converted = 0
+for pagename, page in pages.items():
+	print "%s" % page.getPagePath()
+	res = convertfile(page, output = pagename, overwrite = overwrite)
+	if res != None:
+		print "Converted: %s" % pagename
+		converted += 1
+print "Processed %d files, converted %d" % (len(pages), converted)
 
 if redirect_conf:
 	print "Writing %s: %d items" % (redirect_conf, len(redirect_map))
