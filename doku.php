@@ -24,8 +24,8 @@ $conf['compression'] = 0; //compress old revisions: (0: off) ('gz': gnuzip) ('bz
 $conf['start'] = 'start'; //name of start page
 
 function strip_dir($dir, $fn) {
-  global $conf;
-  return end(explode($dir.'/', $fn, 2));
+	global $conf;
+	return end(explode($dir.'/', $fn, 2));
 }
 
 switch ($argv[1]) {
