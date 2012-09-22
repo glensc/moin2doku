@@ -56,10 +56,10 @@ def writefile(filename, content, overwrite=False):
 	f.write(content)
 	f.close()
 
-# pagedir = MoinMoin page dir
+# page = MoinMoin Page oject
 # ns = DokuWiki namespace where attachments to copy
-def copy_attachments(pagedir, ns):
-	srcdir = os.path.join(pagedir, 'attachments')
+def copy_attachments(page, ns):
+	srcdir = page.getPagePath('attachments', check_create = 0)
 	if not isdir(srcdir):
 		return
 
@@ -203,8 +203,7 @@ def convertfile(page, output = None, overwrite = False):
 		copystat(pagefile, out_file)
 
 	ID = dw.cleanID(output)
-	ns = dw.getNS(ID)
-	copy_attachments(pagedir, ns)
+	copy_attachments(page, dw.getNS(ID))
 
 	# convert edit-log, it's always present even if current page is not
 	convert_editlog(page, output = output, overwrite = overwrite)
