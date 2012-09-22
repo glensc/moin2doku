@@ -159,8 +159,8 @@ def convertfile(pagedir, output = None, overwrite = False):
 
 	page = Page(request, pagename)
 	if page.isUnderlayPage():
-		print "SKIP UNDERLAY"
-		return
+		print "SKIP UNDERLAY: %s" % pagename
+		return False
 
 	current_exists = page.exists()
 	current_rev = page.current_rev()
@@ -222,7 +222,7 @@ def convertfile(pagedir, output = None, overwrite = False):
 		if old_page != ID:
 			redirect_map[old_page] = ID
 
-	return 1
+	return True
 
 #
 # "main" starts here
@@ -303,8 +303,10 @@ else:
 	pages[dw.getId()] = frontpage
 
 	for pagename, page in pages.items():
+		print "%s" % page.getPagePath()
 		res = convertfile(page.getPagePath(), output = pagename, overwrite = overwrite)
 		if res != None:
+			print "Converted: %s" % pagename
 			converted += 1
 	print "Processed %d files, converted %d" % (len(pages), converted)
 
