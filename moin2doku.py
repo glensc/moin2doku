@@ -274,7 +274,8 @@ else:
 	# insert frontpage,
 	# so that MoinMoin frontpage gets saved as DokuWiki frontpage based on their configs
 	frontpage = wikiutil.getFrontPage(request)
-	del pages[frontpage.page_name]
+	if pages.has_key(frontpage.page_name):
+		del pages[frontpage.page_name]
 	pages[dw.getId()] = frontpage
 
 	for pagename, page in pages.items():
