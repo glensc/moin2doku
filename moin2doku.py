@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Setup VIM: ex: et ts=2 sw=2 :
+# Setup VIM: ex: noet ts=2 sw=2 :
 #
 # Main Script doing the conversion.
 # See README for details.
