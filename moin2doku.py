@@ -21,11 +21,7 @@ from moinformat import moin2doku
 
 USEC = 1000000
 
-def check_dirs(moin_pages_dir, output_dir):
-  if moin_pages_dir and not isdir(moin_pages_dir):
-    print >> sys.stderr, "MoinMoin pages directory doesn't exist!"
-    sys.exit(1)
-
+def init_dirs(output_dir):
   if not isdir(output_dir):
     print >> sys.stderr, "Output directory doesn't exist!"
     sys.exit(1)
@@ -41,20 +37,6 @@ def check_dirs(moin_pages_dir, output_dir):
   metadir = os.path.join(output_dir, 'meta')
   if not isdir(metadir):
     mkdir(metadir)
-
-def get_path_names(moin_pages_dir, basenames = False):
-  items = listdir(moin_pages_dir)
-  pathnames = []
-
-  for item in items:
-      absitem = os.path.join(moin_pages_dir, item)
-      if isdir(absitem):
-        if basenames:
-          pathnames.append(item)
-        else:
-          pathnames.append(absitem)
-
-  return pathnames
 
 def readfile(filename):
   with open(filename, 'r') as f:
@@ -253,7 +235,6 @@ except getopt.GetoptError, e:
 
 overwrite = False
 input_file = None
-moin_pages_dir = None
 output_dir = None
 convert_attic = False
 redirect_conf = False
@@ -263,8 +244,6 @@ for o, a in opts:
     print_help()
   if o == "-f":
     overwrite = True
-  if o == "-m":
-    moin_pages_dir = a
   if o == "-a":
     convert_attic = True
   if o == "-r":
@@ -274,15 +253,8 @@ for o, a in opts:
   if o == "-F":
     input_file = a
 
-if not moin_pages_dir and not input_file:
-  print_help()
-  print >> sys.stderr, 'No input file or page dir to process'
-  sys.exit(1)
-
-check_dirs(moin_pages_dir, output_dir)
-
-print "Input dir is: '%s'" % moin_pages_dir
 print "Output dir is: '%s'" % output_dir
+init_dirs(output_dir)
 
 dw = DokuWiki()
 request = RequestCLI()
@@ -298,16 +270,13 @@ else:
   if res != None:
     converted += 1
 
-  pathnames = get_path_names(moin_pages_dir)
-  for pathname in pathnames:
-    if pathname.count('MoinEditorBackup') > 0:
-      print "SKIP %s: skip backups" % pathname
-      continue
-
-    res = convertfile(pathname, overwrite = overwrite)
+  # get list of all pages in wiki
+  pages = request.rootpage.getPageDict(user = '', exists = not convert_attic)
+  for page in pages.values():
+    res = convertfile(page.getPagePath(), overwrite = overwrite)
     if res != None:
       converted += 1
-  print "Processed %d files, converted %d" % (len(pathnames), converted)
+  print "Processed %d files, converted %d" % (len(pages) + 1, converted)
 
 if redirect_conf:
   print "Writing %s: %d items" % (redirect_conf, len(redirect_map))
