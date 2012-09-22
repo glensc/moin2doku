@@ -66,6 +66,8 @@ class Formatter(FormatterBase):
 
     def interwikilink(self, on, interwiki='', pagename='', **kw):
         if on:
+            if interwiki == 'Self':
+                return self.pagelink(on, pagename, **kw)
             return '[[%s>%s|' % (interwiki, pagename)
         else:
             return ']]'
