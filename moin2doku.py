@@ -75,17 +75,16 @@ def copy_attachments(pagedir, ns):
 
 def print_help():
   program = sys.argv[0]
-  print "Usage: %s -m <moinmoin pages directory> -d <output directory>" % program
+  print "Usage: %s OPTIONS" % program
   print "Convert MoinMoin pages to DokuWiki."
   print "Options:"
-  print "-m DIR  - MoinMoin pages dir"
-  print "-d DIR  - Dokuwiki pages dir"
+  print "-d DIR  - output directory"
   print "-a      - Convert Attic pages (history)"
   print "-f      - overwrite output files"
   print "-F FILE - convert single file"
   print "-r FILE - write config for redirect plugin"
   print ""
-  print "%s -m moinmoin/data/pages /var/lib/dokuwiki/pages" % program
+  print "%s -a -d /var/lib/dokuwiki" % program
   print "%s -F moinmoin/data/pages/frontpage -d out" % program
   sys.exit(0)
 
@@ -228,7 +227,7 @@ def convertfile(pagedir, output = None, overwrite = False):
 # "main" starts here
 #
 try:
-  opts, args = getopt.getopt(sys.argv[1:], 'hfam:d:F:r:', [ "help" ])
+  opts, args = getopt.getopt(sys.argv[1:], 'hfad:F:r:', [ "help" ])
 except getopt.GetoptError, e:
   print >> sys.stderr, 'Incorrect parameters! Use --help switch to learn more.: %s' % e
   sys.exit(1)
@@ -252,6 +251,10 @@ for o, a in opts:
     output_dir = a
   if o == "-F":
     input_file = a
+
+if not output_dir:
+  print_help()
+  sys.exit(1)
 
 print "Output dir is: '%s'" % output_dir
 init_dirs(output_dir)
