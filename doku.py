@@ -6,6 +6,7 @@
 # See README for details.
 #
 # Author: Elan Ruusamäe <glen@pld-linux.org>
+# Version: 1.0
 
 import sys
 import subprocess
