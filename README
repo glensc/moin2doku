@@ -1,17 +1,14 @@
-Collected scripts from dokuwiki tips page.
+Complete MoinMoin to DokuWiki converter
+
+Uses native MoinMoin modules to handle converting and translating paths.
+Converts also page history and edit-log.
 
 http://www.dokuwiki.org/tips:moinmoin2doku
 
-moin2doku.py
-
-A script for converting MoinMoin version 1.3+ wiki data to DokuWiki format.
-Call with the name of the directory containing the MoinMoin pages and that
-of the directory to receive the DokuWiki pages on the command line.
-
 Tested with MoinMoin 1.5 and DokuWiki 2012-09-10 releases
 
-You need to run this on host where MoinMoin is configured and DokuWiki is
-configured, it will use current configuration from both wikis.
+You need to run this on host where both MoinMoin and DokuWiki are configured,
+it uses current configuration from both wikis.
 
 Edit doku.php if your DokuWiki installation is other than /usr/share/dokuwiki
 
@@ -29,11 +26,14 @@ after conversion be sure to fix ownership
 also, depending on your configuration, you may need to gzip the attic pages.
 
 History:
-version 0.1  2010-02  Slim Gaillard, based on the "extended python"
-                      convert.py script here:
-                      http://www.dokuwiki.org/tips:moinmoin2doku
-version 0.2  2011     Elan Ruusamäe, moved to github, track history there
-                      https://github.com/glensc/moin2doku
-version 1.0  2012     Complete moinmoin to dokuiki converter, uses native
-                      moinmoin code to handle converting and translating paths.
-                      Converts also page history and edit-log.
+version 0.1  2010-02
+  Slim Gaillard, based on the "extended python" convert.py script here:
+  https://www.dokuwiki.org/tips:moinmoin2doku?rev=1297006559#extended_python
+
+version 0.2  2011
+  Elan Ruusamäe, moved to github, track history there
+  https://github.com/glensc/moin2doku
+
+version 1.0  2012
+  Complete moinmoin to dokuwiki converter, uses native moinmoin code to handle
+  converting and translating paths. Converts also page history and edit-log.
