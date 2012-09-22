@@ -227,6 +227,15 @@ def convertfile(pagedir, output = None, overwrite = False):
 #
 # "main" starts here
 #
+
+# setup utf8 output
+if sys.stdout.isatty():
+	default_encoding = sys.stdout.encoding
+else:
+	import locale
+	default_encoding = locale.getpreferredencoding()
+sys.stdout = codecs.getwriter(default_encoding)(sys.stdout);
+
 try:
 	opts, args = getopt.getopt(sys.argv[1:], 'hfad:F:r:', [ "help" ])
 except getopt.GetoptError, e:
