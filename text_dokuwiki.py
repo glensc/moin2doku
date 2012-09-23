@@ -234,6 +234,8 @@ class Formatter(FormatterBase):
         try:
             syntax = {
                 'ColorizedPython': 'python',
+                'ColorizedPascal': 'pascal',
+                'ColorizedJava': 'java',
                 'ColorizedCPlusPlus': 'cpp',
             }[code_type]
         except KeyError:
