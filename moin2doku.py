@@ -172,7 +172,6 @@ def convertfile(page, output = None, overwrite = False):
 	for rev in revs:
 		page = Page(request, pagename, rev = rev)
 		pagefile, realrev, exists = page.get_rev(rev = rev);
-		print "EXISTS loop: %s " % exists
 
 		mtime = page.mtime_usecs() / USEC
 
@@ -219,6 +218,8 @@ def convertfile(page, output = None, overwrite = False):
 		old_page = pagename.lower().replace('/', ':').replace(' ', '_')
 		if old_page != ID:
 			redirect_map[old_page] = ID
+
+	print "Converted %s as %s" % (pagename, dw.wikiFN(output))
 
 	return True
 
@@ -307,7 +308,6 @@ for output, pagename in pages.items():
 	page = Page(request, pagename)
 	res = convertfile(page, output = output, overwrite = overwrite)
 	if res != None:
-		print "Converted: %s" % pagename
 		converted += 1
 print "Processed %d files, converted %d" % (len(pages), converted)
 
