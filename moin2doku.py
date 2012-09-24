@@ -52,8 +52,12 @@ def writefile(filename, content, overwrite=False):
 	if os.path.exists(filename) and overwrite == False:
 		raise OSError, 'File already exists: %s' % filename
 
+	# ensure it's a list
+	if not isinstance(content, (list, tuple)):
+		content = [content]
+
 	f = codecs.open(filename, 'w', 'utf-8')
-	f.write(content)
+	f.writelines([line + u'\n' for line in content])
 	f.close()
 
 # page = MoinMoin Page oject
@@ -124,7 +128,7 @@ def convert_editlog(page, output = None, overwrite = False):
 			action = log.action
 
 		mtime = str(log.ed_time_usecs / USEC)
-		changes[mtime] = "\t".join([mtime, log.addr, action, dw.cleanID(log.pagename), author, log.comment])
+		changes[mtime] = u"\t".join([mtime, log.addr, action, dw.cleanID(log.pagename), author, log.comment])
 
 	# see if we have missing entries, try to recover
 	page = Page(request, pagename)
@@ -142,12 +146,12 @@ def convert_editlog(page, output = None, overwrite = False):
 
 			mtime = str(mtime)
 			if not changes.has_key(mtime):
-				changes[mtime] = "\t".join([mtime, '127.0.0.1', '?', dw.cleanID(pagename), 'root', 'recovered entry'])
+				changes[mtime] = u"\t".join([mtime, '127.0.0.1', '?', dw.cleanID(pagename), 'root', 'recovered entry'])
 				print "ADDING %s" % mtime
 
 	changes = sorted(changes.values())
 	out_file = os.path.join(output_dir, 'meta', dw.metaFN(output, '.changes'))
-	writefile(out_file, "\n".join(changes), overwrite = overwrite)
+	writefile(out_file, changes, overwrite = overwrite)
 
 def convertfile(page, output = None, overwrite = False):
 	pagedir = page.getPagePath()
@@ -313,5 +317,5 @@ print "Processed %d files, converted %d" % (len(pages), converted)
 
 if redirect_conf:
 	print "Writing %s: %d items" % (redirect_conf, len(redirect_map))
-	content = '\n'.join('\t'.join(pair) for pair in redirect_map.items())
+	content = [u"\t".join(pair) for pair in redirect_map.items()]
 	writefile(redirect_conf, content, overwrite = overwrite)
