@@ -18,12 +18,14 @@ $ ./moin2doku.py -a -d /var/lib/dokuwiki
 To convert single page (FrontPage):
 $ ./moin2doku.py -F moinmoin/data/pages/FrontPage -d out
 
-after conversion be sure to fix ownership
+You should invoke bin/indexer.php after conversion to make all pages are indexed.
+
+and ensure ownership of files is correct:
 (www-data:www-data being your uid/gid webserver runs):
 # chown -R www-data:www-data /var/lib/dokuwiki/pages/*
 # chown -R www-data:www-data /var/lib/dokuwiki/media/*
 
-also, depending on your configuration, you may need to gzip the attic pages.
+additionally, depending on your configuration, you may need to gzip the attic pages.
 
 History:
 version 0.1  2010-02
