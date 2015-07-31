@@ -53,3 +53,7 @@ version 1.0 (2012)
 
 Complete moinmoin to dokuwiki converter, uses native moinmoin code to handle
 converting and translating paths. Converts also page history and edit-log.
+
+This marks the project "done", I will no longer develop it or support it, as I got my conversion done. However, I do accept patches (pull requests) to sane amount.
+
+I put repo online so others have better starting point than I did.
